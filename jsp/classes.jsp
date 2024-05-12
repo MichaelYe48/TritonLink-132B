@@ -37,9 +37,45 @@
                         pstmt.setString(2, request.getParameter("Title"));
                         pstmt.setString(3, request.getParameter("Quarter"));
                         pstmt.setInt(4, Integer.parseInt(request.getParameter("Year")));
-
+                       
                         pstmt.executeUpdate();
                         connection.commit();
+                        connection.setAutoCommit(true);
+                        pstmt.close();
+                        }
+
+                        // Update
+                        // Check if an update is requested
+                        if (action != null && action.equals("update")) {
+                        connection.setAutoCommit(false);
+                        // Create the prepared statement and use it to
+                        // UPDATE the student attributes in the Student table.
+                        PreparedStatement pstatement = connection.prepareStatement(
+                        "UPDATE Class SET Title = ?, Quarter = ?, " +
+                        "Year = ? WHERE Course_number = ?");
+                        pstatement.setInt(1,Integer.parseInt(request.getParameter("Course_number")));
+                        pstatement.setString(2, request.getParameter("Title"));
+                        pstatement.setString(3, request.getParameter("Quarter"));
+                        pstatement.setInt(4, Integer.parseInt(request.getParameter("Year")));
+
+                        int rowCount = pstatement.executeUpdate();
+                        connection.setAutoCommit(false);
+                        connection.setAutoCommit(true);
+                        pstatement.close();
+                        }
+
+                        // Delete
+                        // Check if a delete is requested
+                        if (action != null && action.equals("delete")) {
+                        connection.setAutoCommit(false);
+                        // Create the prepared statement and use it to
+                        // DELETE the student FROM the Student table.
+                        PreparedStatement pstmt1 = connection.prepareStatement(
+                        "DELETE FROM Class WHERE Course_number = ?");
+                        pstmt1.setInt(1,
+                        Integer.parseInt(request.getParameter("Course_number")));
+                        int rowCount = pstmt1.executeUpdate();
+                        connection.setAutoCommit(false);
                         connection.setAutoCommit(true);
                         }
 
@@ -57,7 +93,7 @@
                         <th>Year</th>
                     </tr>
                     <tr>
-                        <form action="students.jsp" method="get">
+                        <form action="classes.jsp" method="get">
                         <input type="hidden" value="insert" name="action">
                         <th><input value="" name="Course_number" size="15"></th>
                         <th><input value="" name="Title" size="15"></th>
@@ -65,7 +101,24 @@
                         <th><input value="" name="Year" size="15"></th>
                         <th><input type="submit" value="Insert"></th>
                         </form>
-                        </tr>
+                    </tr>
+                    <tr>
+                        <form action="classes.jsp" method="get">
+                        <input type="hidden" value="update" name="action">
+                        <td><input value="<%= rs.getInt("Course_number") %>" name="Course_number"></td>
+                        <td><input value="<%= rs.getString("Title") %>" name="Title"></td>
+                        <td><input value="<%= rs.getString("Quarter") %>" name="Quarter"></td>
+                        <td><input value="<%= rs.getInt("Year") %>" name="Year"></td>
+                        <td><input type="submit" value="Update"></td>
+                        </form>
+
+                        <form action="classes.jsp" method="get">
+                        <input type="hidden" value="delete" name="action">
+                        <input type="hidden" value="<%= rs.getInt("Course_number") %>"
+                        name="Course_number">
+                        <td><input type="submit" value="Delete"></td>
+                        </form>
+                    </tr>
                     <%
                     // Iterate over the ResultSet
                     if (rs != null) {

@@ -1,0 +1,182 @@
+<html>
+<body>
+    <table>
+        <tr>
+            <td>
+                <jsp:include page="menu.html" />
+            </td>
+            <td>
+                <%@ page language="java" import="java.sql.*" %>
+                    <%
+                    String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
+                    String username = "dylanolivares";
+                    String password = "dylanolivares";
+
+                    Connection connection = null;
+                    Statement statement = null;
+                    ResultSet rs = null;
+            
+                    // Try to establish a connection to the database
+                    try {
+                        // Load the PostgreSQL JDBC driver class
+                        Class.forName("org.postgresql.Driver");
+            
+                        // Create a connection to the database
+                        connection = DriverManager.getConnection(jdbcUrl, username, password);
+                        
+                        // Insert
+                        // Check if an insertion is requested
+                        String action = request.getParameter("action");
+                        if (action != null && action.equals("insert")) {
+                        connection.setAutoCommit(false);
+                        // Create the prepared statement and use it to
+                        PreparedStatement pstmt = connection.prepareStatement(
+                        ("INSERT INTO Course VALUES (?, ?, ?, ?, ?, ?)"));
+                        pstmt.setInt(1, Integer.parseInt(request.getParameter("Course_number")));
+                        pstmt.setString(2, request.getParameter("Course_consent"));
+                        pstmt.setString(3, request.getParameter("Grade_type"));
+                        pstmt.setBoolean(4, Boolean.parseBoolean(request.getParameter("Lab")));
+                        pstmt.setInt(5, Integer.parseInt(request.getParameter("Units")));
+                        pstmt.setString(6, request.getParameter("Prerequisites"));
+
+                       
+                        pstmt.executeUpdate();
+                        connection.commit();
+                        connection.setAutoCommit(true);
+                        pstmt.close();
+                        }
+
+                        // Update
+                        // Check if an update is requested
+                        if (action != null && action.equals("update")) {
+                        connection.setAutoCommit(false);
+                        // Create the prepared statement and use it to
+                        // UPDATE the student attributes in the Student table.
+                        PreparedStatement pstatement = connection.prepareStatement(
+                        "UPDATE Course SET Course_consent = ?, Grade_type = ?, " +
+                        "Lab = ?, Units = ?, Prerequisites = ? WHERE Course_number = ?");
+                        pstatement.setInt(1, Integer.parseInt(request.getParameter("Course_number")));
+                        pstatement.setString(2, request.getParameter("Course_consent"));
+                        pstatement.setString(3, request.getParameter("Grade_type"));
+                        pstatement.setBoolean(4, Boolean.parseBoolean(request.getParameter("Lab")));
+                        pstatement.setInt(5, Integer.parseInt(request.getParameter("Units")));
+                        pstatement.setString(6, request.getParameter("Prerequisites"));
+
+
+                        int rowCount = pstatement.executeUpdate();
+                        connection.setAutoCommit(false);
+                        connection.setAutoCommit(true);
+                        pstatement.close();
+                        }
+
+                        // Delete
+                        // Check if a delete is requested
+                        if (action != null && action.equals("delete")) {
+                        connection.setAutoCommit(false);
+                        // Create the prepared statement and use it to
+                        PreparedStatement pstmt1 = connection.prepareStatement(
+                        "DELETE FROM Course WHERE Course_number = ?");
+                        pstmt1.setInt(1,
+                        Integer.parseInt(request.getParameter("Course_number")));
+                        int rowCount = pstmt1.executeUpdate();
+                        connection.setAutoCommit(false);
+                        connection.setAutoCommit(true);
+                        }
+
+                        // Create the statement
+                        statement = connection.createStatement();
+                        rs = statement.executeQuery("SELECT * FROM Course");            
+                    %>
+                <table>
+                    <tr>
+                        <th>Course Number</th>
+                        <th>Course Consent</th>
+                        <th>Grade Type</th>
+                        <th>Lab</th>
+                        <th>Units</th>
+                        <th>Prerequisites</th>
+                    </tr>
+                    <tr>
+                        <form action="courses.jsp" method="get">
+                            <input type="hidden" value="insert" name="action">
+                            <th><input value="" name="Course_number" size="15"></th>
+                            <th><input value="" name="Course_consent" size="15"></th>
+                            <th><input value="" name="Grade_type" size="15"></th>
+                            <th><input type="checkbox" name="Lab"></th>
+                            <th><input value="" name="Units" size="15"></th>
+                            <th><input value="" name="Prerequisites" size="15"></th>
+                            <th><input type="submit" value="Insert"></th>
+                        </form>
+                    </tr>
+                    <tr>
+                        <form action="courses.jsp" method="get">
+                            <input type="hidden" value="update" name="action">
+                            <td><input value="<%= rs.getInt("Course_number") %>" name="Course_number"></td>
+                            <td><input value="<%= rs.getString("Course_consent") %>" name="Course_consent"></td>
+                            <td><input value="<%= rs.getString("Grade_type") %>" name="Grade_type"></td>
+                            <td><input type="checkbox" name="Lab" <%= rs.getBoolean("Lab") ? "checked" : "" %>></td>
+                            <td><input value="<%= rs.getInt("Units") %>" name="Units"></td>
+                            <td><input value="<%= rs.getString("Prerequisites") %>" name="Prerequisites"></td>
+                            <td><input type="submit" value="Update"></td>
+                        </form>
+                    
+                        <form action="courses.jsp" method="get">
+                            <input type="hidden" value="delete" name="action">
+                            <input type="hidden" value="<%= rs.getInt("Course_number") %>" name="Course_number">
+                            <td><input type="submit" value="Delete"></td>
+                        </form>
+                    </tr>
+                    
+                    <%
+                    // Iterate over the ResultSet
+                    out.println("hi");
+                    if (rs != null) {
+                    while ( rs.next() ) {
+                        out.println("hi");
+                    %>
+            
+                    <tr>
+                        <%-- Get the Course_number --%>
+                        <td><%= rs.getInt("Course_number") %></td>
+                        <%-- Get the Course_consent --%>
+                        <td><%= rs.getString("Course_consent") %></td>
+                        <%-- Get the Grade_type --%>
+                        <td><%= rs.getString("Grade_type") %></td>
+                        <%-- Get the Lab --%>
+                        <td><%= rs.getBoolean("Lab") %></td>
+                        <%-- Get the Units --%>
+                        <td><%= rs.getInt("Units") %></td>
+                        <%-- Get the Prerequisites --%>
+                        <td><%= rs.getString("Prerequisites") %></td>
+                    </tr>
+
+                <%
+                    }
+                }
+                %>
+
+                </table>
+
+                <%
+                // Close the ResultSet
+                rs.close();
+                // Close the Statement
+                statement.close();
+                // Close the Connection
+                connection.close();
+                } catch (SQLException sqle) {
+                    out.println("SQL Exception: " + sqle.getMessage());
+                    sqle.printStackTrace();
+                } catch (ClassNotFoundException cnfe) {
+                    out.println("Class Not Found Exception: " + cnfe.getMessage());
+                    cnfe.printStackTrace();
+                } catch (Exception e) {
+                    out.println("Exception: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                %>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
