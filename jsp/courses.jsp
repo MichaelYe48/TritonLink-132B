@@ -28,7 +28,7 @@
                         // Check if an insertion is requested
                         String action = request.getParameter("action");
                         if (action != null && action.equals("insert")) {
-                        connection.setAutoCommit(false);
+                        // connection.setAutoCommit(false);
                         // Create the prepared statement and use it to
                         PreparedStatement pstmt = connection.prepareStatement(
                         ("INSERT INTO Course VALUES (?, ?, ?, ?, ?, ?)"));
@@ -54,11 +54,13 @@
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstatement = connection.prepareStatement(
                         "UPDATE Course SET Course_consent = ?, Grade_type = ?, " +
-                        "Lab = ?, Units = ?, Prerequisites = ? WHERE Course_number = ?");
+                        "Lab = ?::boolean, Units = ?::integer, Prerequisites = ? WHERE Course_number = ?::integer");
                         pstatement.setInt(1, Integer.parseInt(request.getParameter("Course_number")));
                         pstatement.setString(2, request.getParameter("Course_consent"));
                         pstatement.setString(3, request.getParameter("Grade_type"));
-                        pstatement.setBoolean(4, Boolean.parseBoolean(request.getParameter("Lab")));
+                        String labValue = request.getParameter("Lab");
+                        boolean lab = labValue != null && labValue.equals("on");
+                        pstatement.setBoolean(4, lab);
                         pstatement.setInt(5, Integer.parseInt(request.getParameter("Units")));
                         pstatement.setString(6, request.getParameter("Prerequisites"));
 
@@ -85,7 +87,7 @@
 
                         // Create the statement
                         statement = connection.createStatement();
-                        rs = statement.executeQuery("SELECT * FROM Course");            
+                        rs = statement.executeQuery("SELECT * FROM Course");
                     %>
                 <table>
                     <tr>
@@ -108,18 +110,21 @@
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
+                    <%
+                    // Iterate over the ResultSet
+                    while ( rs.next() ) {
+                    %>
                     <tr>
                         <form action="courses.jsp" method="get">
                             <input type="hidden" value="update" name="action">
-                            <td><input value="<%= rs.getInt("Course_number") %>" name="Course_number"></td>
-                            <td><input value="<%= rs.getString("Course_consent") %>" name="Course_consent"></td>
-                            <td><input value="<%= rs.getString("Grade_type") %>" name="Grade_type"></td>
-                            <td><input type="checkbox" name="Lab" <%= rs.getBoolean("Lab") ? "checked" : "" %>></td>
-                            <td><input value="<%= rs.getInt("Units") %>" name="Units"></td>
-                            <td><input value="<%= rs.getString("Prerequisites") %>" name="Prerequisites"></td>
-                            <td><input type="submit" value="Update"></td>
+                            <th><input value="<%= rs.getInt("Course_number") %>" name="Course_number"></th>
+                            <th><input value="<%= rs.getString("Course_consent") %>" name="Course_consent"></th>
+                            <th><input value="<%= rs.getString("Grade_type") %>" name="Grade_type"></th>
+`                           <th><input type="checkbox" name="Lab" <%= rs.getBoolean("Lab") ? "checked" : "" %>></th>
+                            <th><input value="<%= rs.getInt("Units") %>" name="Units"></th>
+                            <th><input value="<%= rs.getString("Prerequisites") %>" name="Prerequisites"></th>
+                            <th><input type="submit" value="Update"></th>
                         </form>
-                    
                         <form action="courses.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
                             <input type="hidden" value="<%= rs.getInt("Course_number") %>" name="Course_number">
@@ -127,32 +132,10 @@
                         </form>
                     </tr>
                     
-                    <%
-                    // Iterate over the ResultSet
-                    out.println("hi");
-                    if (rs != null) {
-                    while ( rs.next() ) {
-                        out.println("hi");
-                    %>
-            
-                    <tr>
-                        <%-- Get the Course_number --%>
-                        <td><%= rs.getInt("Course_number") %></td>
-                        <%-- Get the Course_consent --%>
-                        <td><%= rs.getString("Course_consent") %></td>
-                        <%-- Get the Grade_type --%>
-                        <td><%= rs.getString("Grade_type") %></td>
-                        <%-- Get the Lab --%>
-                        <td><%= rs.getBoolean("Lab") %></td>
-                        <%-- Get the Units --%>
-                        <td><%= rs.getInt("Units") %></td>
-                        <%-- Get the Prerequisites --%>
-                        <td><%= rs.getString("Prerequisites") %></td>
-                    </tr>
 
                 <%
                     }
-                }
+                
                 %>
 
                 </table>
