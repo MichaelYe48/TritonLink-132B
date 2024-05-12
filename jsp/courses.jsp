@@ -41,8 +41,8 @@
 
                        
                         pstmt.executeUpdate();
-                        connection.commit();
-                        //connection.setAutoCommit(true);
+                        // connection.commit();
+                        // connection.setAutoCommit(true);
                         pstmt.close();
                         }
 
