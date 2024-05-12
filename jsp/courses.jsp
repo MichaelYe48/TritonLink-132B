@@ -28,23 +28,33 @@
                         // Check if an insertion is requested
                         String action = request.getParameter("action");
                         if (action != null && action.equals("insert")) {
-                        // connection.setAutoCommit(false);
-                        // Create the prepared statement and use it to
-                        PreparedStatement pstmt = connection.prepareStatement(
-                        ("INSERT INTO Course VALUES (?, ?, ?, ?, ?, ?)"));
-                        pstmt.setInt(1, Integer.parseInt(request.getParameter("Course_number")));
-                        pstmt.setString(2, request.getParameter("Course_consent"));
-                        pstmt.setString(3, request.getParameter("Grade_type"));
-                        pstmt.setBoolean(4, Boolean.parseBoolean(request.getParameter("Lab")));
-                        pstmt.setInt(5, Integer.parseInt(request.getParameter("Units")));
-                        pstmt.setString(6, request.getParameter("Prerequisites"));
-
-                       
-                        pstmt.executeUpdate();
-                        // connection.commit();
-                        // connection.setAutoCommit(true);
-                        pstmt.close();
+                            // Check if the record already exists
+                            PreparedStatement checkStmt = connection.prepareStatement(
+                                "SELECT COUNT(*) FROM Course WHERE Course_number = ?");
+                            checkStmt.setInt(1, Integer.parseInt(request.getParameter("Course_number")));
+                            ResultSet checkResult = checkStmt.executeQuery();
+                            checkResult.next();
+                            int count = checkResult.getInt(1);
+                            checkStmt.close();
+                            
+                            if (count == 0) { // If record doesn't exist, then insert
+                                PreparedStatement pstmt = connection.prepareStatement(
+                                    "INSERT INTO Course (Course_number, Course_consent, Grade_type, Lab, Units, Prerequisites) VALUES (?, ?, ?, ?, ?, ?)");
+                                pstmt.setInt(1, Integer.parseInt(request.getParameter("Course_number")));
+                                pstmt.setString(2, request.getParameter("Course_consent"));
+                                pstmt.setString(3, request.getParameter("Grade_type"));
+                                String labValue = request.getParameter("Lab");
+                                boolean lab = labValue != null && labValue.equals("on");
+                                pstmt.setBoolean(4, lab);
+                                pstmt.setInt(5, Integer.parseInt(request.getParameter("Units")));
+                                pstmt.setString(6, request.getParameter("Prerequisites"));
+                                pstmt.executeUpdate();
+                                pstmt.close();
+                            } else {
+                                out.println("Record already exists!");
+                            }
                         }
+
 
                         // Update
                         // Check if an update is requested
@@ -64,8 +74,6 @@
                         pstatement.setString(5, request.getParameter("Prerequisites"));
                         pstatement.setInt(6, Integer.parseInt(request.getParameter("Course_number")));
 
-
-
                         int rowCount = pstatement.executeUpdate();
                         connection.setAutoCommit(false);
                         // connection.setAutoCommit(true);
@@ -75,15 +83,12 @@
                         // Delete
                         // Check if a delete is requested
                         if (action != null && action.equals("delete")) {
-                        connection.setAutoCommit(false);
-                        // Create the prepared statement and use it to
                         PreparedStatement pstmt1 = connection.prepareStatement(
                         "DELETE FROM Course WHERE Course_number = ?");
                         pstmt1.setInt(1,
                         Integer.parseInt(request.getParameter("Course_number")));
                         int rowCount = pstmt1.executeUpdate();
-                        connection.setAutoCommit(false);
-                        //connection.setAutoCommit(true);
+                        pstmt1.close();
                         }
 
                         // Create the statement
