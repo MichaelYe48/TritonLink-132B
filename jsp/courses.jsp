@@ -42,7 +42,7 @@
                        
                         pstmt.executeUpdate();
                         connection.commit();
-                        connection.setAutoCommit(true);
+                        //connection.setAutoCommit(true);
                         pstmt.close();
                         }
 
@@ -54,20 +54,21 @@
                         // UPDATE the student attributes in the Student table.
                         PreparedStatement pstatement = connection.prepareStatement(
                         "UPDATE Course SET Course_consent = ?, Grade_type = ?, " +
-                        "Lab = ?::boolean, Units = ?::integer, Prerequisites = ? WHERE Course_number = ?::integer");
-                        pstatement.setInt(1, Integer.parseInt(request.getParameter("Course_number")));
-                        pstatement.setString(2, request.getParameter("Course_consent"));
-                        pstatement.setString(3, request.getParameter("Grade_type"));
+                        "Lab = ?, Units = ?, Prerequisites = ? WHERE Course_number = ?");
+                        pstatement.setString(1, request.getParameter("Course_consent"));
+                        pstatement.setString(2, request.getParameter("Grade_type"));
                         String labValue = request.getParameter("Lab");
                         boolean lab = labValue != null && labValue.equals("on");
-                        pstatement.setBoolean(4, lab);
-                        pstatement.setInt(5, Integer.parseInt(request.getParameter("Units")));
-                        pstatement.setString(6, request.getParameter("Prerequisites"));
+                        pstatement.setBoolean(3, lab);
+                        pstatement.setInt(4, Integer.parseInt(request.getParameter("Units")));
+                        pstatement.setString(5, request.getParameter("Prerequisites"));
+                        pstatement.setInt(6, Integer.parseInt(request.getParameter("Course_number")));
+
 
 
                         int rowCount = pstatement.executeUpdate();
                         connection.setAutoCommit(false);
-                        connection.setAutoCommit(true);
+                        // connection.setAutoCommit(true);
                         pstatement.close();
                         }
 
@@ -82,7 +83,7 @@
                         Integer.parseInt(request.getParameter("Course_number")));
                         int rowCount = pstmt1.executeUpdate();
                         connection.setAutoCommit(false);
-                        connection.setAutoCommit(true);
+                        //connection.setAutoCommit(true);
                         }
 
                         // Create the statement
@@ -120,7 +121,7 @@
                             <th><input value="<%= rs.getInt("Course_number") %>" name="Course_number"></th>
                             <th><input value="<%= rs.getString("Course_consent") %>" name="Course_consent"></th>
                             <th><input value="<%= rs.getString("Grade_type") %>" name="Grade_type"></th>
-`                           <th><input type="checkbox" name="Lab" <%= rs.getBoolean("Lab") ? "checked" : "" %>></th>
+                            <th><input type="checkbox" name="Lab" <%= rs.getBoolean("Lab") ? "checked" : "" %>></th>
                             <th><input value="<%= rs.getInt("Units") %>" name="Units"></th>
                             <th><input value="<%= rs.getString("Prerequisites") %>" name="Prerequisites"></th>
                             <th><input type="submit" value="Update"></th>
