@@ -25,6 +25,23 @@
                         connection = DriverManager.getConnection(jdbcUrl, username, password);
             
                         // Insert
+                        // Check if an insertion is requested
+                        String action = request.getParameter("action");
+                        if (action != null && action.equals("insert")) {
+                        connection.setAutoCommit(false);
+                        // Create the prepared statement and use it to
+                        // INSERT the student attrs INTO the Student table.
+                        PreparedStatement pstmt = connection.prepareStatement(
+                        ("INSERT INTO Class VALUES (?, ?, ?, ?)"));
+                        pstmt.setInt(1,Integer.parseInt(request.getParameter("Course_number")));
+                        pstmt.setString(2, request.getParameter("Title"));
+                        pstmt.setString(3, request.getParameter("Quarter"));
+                        pstmt.setInt(4, Integer.parseInt(request.getParameter("Year")));
+
+                        pstmt.executeUpdate();
+                        connection.commit();
+                        connection.setAutoCommit(true);
+                        }
 
                         // Create the statement
                         statement = connection.createStatement();
@@ -39,7 +56,16 @@
                         <th>Quarter</th>
                         <th>Year</th>
                     </tr>
-
+                    <tr>
+                        <form action="students.jsp" method="get">
+                        <input type="hidden" value="insert" name="action">
+                        <th><input value="" name="Course_number" size="15"></th>
+                        <th><input value="" name="Title" size="15"></th>
+                        <th><input value="" name="Quarter" size="15"></th>
+                        <th><input value="" name="Year" size="15"></th>
+                        <th><input type="submit" value="Insert"></th>
+                        </form>
+                        </tr>
                     <%
                     // Iterate over the ResultSet
                     if (rs != null) {
