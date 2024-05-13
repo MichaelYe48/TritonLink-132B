@@ -124,10 +124,10 @@
                         </form>
                         <form action="works_under.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getString("Department_Name") %>" name="Department_Name"></th>
-                            <th><input value="<%= rs.getString("First_Name") %>" name="First_Name"></th>
-                            <th><input value="<%= rs.getString("Middle_Name") %>" name="Middle_Name"></th>
-                            <th><input value="<%= rs.getString("Last_Name") %>" name="Last_Name"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Department_Name") %>" name="Department_Name"></th>
+                            <th><input type="hidden" value="<%= rs.getString("First_Name") %>" name="First_Name"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Middle_Name") %>" name="Middle_Name"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Last_Name") %>" name="Last_Name"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

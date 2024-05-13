@@ -113,7 +113,7 @@
                         </form>
                         <form action="taught_by.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getInt("Section_ID") %>" name="Section_ID"></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Section_ID") %>" name="Section_ID"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

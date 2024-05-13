@@ -112,22 +112,22 @@
                     <tr>
                         <form action="offered_as.jsp" method="get">
                             <input type="hidden" value="update" name="action">
-                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number" readonly></th>
-                            <th><input value="<%= rs.getInt("Year") %>" name="Year" readonly></th>
-                            <th><input value="<%= rs.getString("Title") %>" name="Title" readonly></th>
-                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter" readonly></th>
-                            <th><input type="text" name="New_Course_Number"></th>
-                            <th><input type="text" name="New_Year"></th>
-                            <th><input type="text" name="New_Title"></th>
-                            <th><input type="text" name="New_Quarter"></th>
+                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number"></th>
+                            <th><input value="<%= rs.getInt("Year") %>" name="Year"></th>
+                            <th><input value="<%= rs.getString("Title") %>" name="Title"></th>
+                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                                <th><input type="text" name="New_Course_Number"></th>
+                                <th><input type="text" name="New_Year"></th>
+                                <th><input type="text" name="New_Title"></th>
+                                <th><input type="text" name="New_Quarter"></th>
                             <th><input type="submit" value="Update"></th>
                         </form>
                         <form action="offered_as.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number" readonly></th>
-                            <th><input value="<%= rs.getInt("Year") %>" name="Year" readonly></th>
-                            <th><input value="<%= rs.getString("Title") %>" name="Title" readonly></th>
-                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter" readonly></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Course_Number") %>" name="Course_Number"></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Year") %>" name="Year"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Title") %>" name="Title"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

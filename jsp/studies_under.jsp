@@ -101,7 +101,7 @@
                         </form>
                         <form action="studies_under.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getString("SSN") %>" name="SSN"></th>
+                            <th><input type="hidden" value="<%= rs.getString("SSN") %>" name="SSN"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

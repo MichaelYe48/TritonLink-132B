@@ -102,16 +102,16 @@
                             <input type="hidden" value="update" name="action">
                             <input type="hidden" value="<%= rs.getInt("Section_ID") %>" name="Section_ID">
                             <input type="hidden" value="<%= rs.getTime("Start_Time") %>" name="Start_Time">
-                            <th><input value="<%= rs.getInt("Section_ID") %>" name="Section_ID" readonly></th>
-                            <th><input value="<%= rs.getTime("Start_Time") %>" name="Start_Time" readonly></th>
+                            <th><input value="<%= rs.getInt("Section_ID") %>" name="Section_ID"></th>
+                            <th><input value="<%= rs.getTime("Start_Time") %>" name="Start_Time"></th>
                             <th><input value="<%= rs.getTime("End_Time") %>" name="End_Time"></th>
                             <th><input type="submit" value="Update"></th>
                         </form>
                         <form action="has_meeting.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getInt("Section_ID") %>" name="Section_ID" readonly></th>
-                            <th><input value="<%= rs.getTime("Start_Time") %>" name="Start_Time" readonly></th>
-                            <th><input value="<%= rs.getTime("End_Time") %>" name="End_Time" readonly></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Section_ID") %>" name="Section_ID" ></th>
+                            <th><input type="hidden" value="<%= rs.getTime("Start_Time") %>" name="Start_Time"></th>
+                            <th><input type="hidden" value="<%= rs.getTime("End_Time") %>" name="End_Time"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

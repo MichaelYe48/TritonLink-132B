@@ -119,11 +119,11 @@
                     <tr>
                         <form action="concentration.jsp" method="get">
                             <input type="hidden" value="update" name="action">
-                            <th><input value="<%= rs.getString("Degree_Type") %>" name="Degree_Type" readonly></th>
-                            <th><input value="<%= rs.getString("Degree_Name") %>" name="Degree_Name" readonly></th>
-                            <th><input value="<%= rs.getString("University") %>" name="University" readonly></th>
-                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number" readonly></th>
-                            <th><input value="<%= rs.getString("Concentration_Name") %>" name="Concentration_Name" readonly></th>
+                            <th><input value="<%= rs.getString("Degree_Type") %>" name="Degree_Type"></th>
+                            <th><input value="<%= rs.getString("Degree_Name") %>" name="Degree_Name"></th>
+                            <th><input value="<%= rs.getString("University") %>" name="University"></th>
+                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number"></th>
+                            <th><input value="<%= rs.getString("Concentration_Name") %>" name="Concentration_Name"></th>
                             <th><input type="text" name="New_Degree_Type"></th>
                             <th><input type="text" name="New_Degree_Name"></th>
                             <th><input type="text" name="New_University"></th>
@@ -133,11 +133,11 @@
                         </form>
                         <form action="concentration.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getString("Degree_Type") %>" name="Degree_Type" readonly></th>
-                            <th><input value="<%= rs.getString("Degree_Name") %>" name="Degree_Name" readonly></th>
-                            <th><input value="<%= rs.getString("University") %>" name="University" readonly></th>
-                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number" readonly></th>
-                            <th><input value="<%= rs.getString("Concentration_Name") %>" name="Concentration_Name" readonly></th>
+                            <th><input type="hidden" value="<%= rs.getString("Degree_Type") %>" name="Degree_Type"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Degree_Name") %>" name="Degree_Name"></th>
+                            <th><input type="hidden" value="<%= rs.getString("University") %>" name="University"></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Course_Number") %>" name="Course_Number"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Concentration_Name") %>" name="Concentration_Name"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

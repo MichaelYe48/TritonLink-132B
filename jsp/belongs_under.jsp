@@ -98,7 +98,7 @@
                     <tr>
                         <form action="belongs_under.jsp" method="get">
                             <input type="hidden" value="update" name="action">
-                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number" readonly></th>
+                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number"></th>
                             <th><input value="<%= rs.getString("Department_Name") %>" name="Department_Name"></th>
                             <th><input type="text" name="New_Course_Number"></th>
                             <th><input type="text" name="New_Department_Name"></th>
@@ -106,8 +106,8 @@
                         </form>
                         <form action="belongs_under.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number" readonly></th>
-                            <th><input value="<%= rs.getString("Department_Name") %>" name="Department_Name" readonly></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Course_Number") %>" name="Course_Number"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Department_Name") %>" name="Department_Name"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

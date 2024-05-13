@@ -62,10 +62,10 @@
                             PreparedStatement pstmt = connection.prepareStatement(
                                 "UPDATE Enrolled_In SET Year = ?, Title = ?, Quarter = ?, Zip_code = ?, Grade_Achieved = ? WHERE SSN = ? AND Year = ? AND Title = ? AND Quarter = ?");
                             pstmt.setInt(1, Integer.parseInt(request.getParameter("New_Year")));
-                            pstmt.setString(2, request.getParameter("New_Title"));
-                            pstmt.setString(3, request.getParameter("New_Quarter"));
-                            pstmt.setString(4, request.getParameter("New_Zip_code"));
-                            pstmt.setString(5, request.getParameter("New_Grade_Achieved"));
+                            pstmt.setString(2, request.getParameter("Title"));
+                            pstmt.setString(3, request.getParameter("Quarter"));
+                            pstmt.setString(4, request.getParameter("Zip_code"));
+                            pstmt.setString(5, request.getParameter("Grade_Achieved"));
                             pstmt.setString(6, request.getParameter("SSN"));
                             pstmt.setInt(7, Integer.parseInt(request.getParameter("Year")));
                             pstmt.setString(8, request.getParameter("Title"));
@@ -119,27 +119,22 @@
                     <tr>
                         <form action="enrolled_in.jsp" method="get">
                             <input type="hidden" value="update" name="action">
-                            <th><input value="<%= rs.getString("SSN") %>" name="SSN" readonly></th>
-                            <th><input value="<%= rs.getInt("Year") %>" name="Year" readonly></th>
-                            <th><input value="<%= rs.getString("Title") %>" name="Title" readonly></th>
-                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter" readonly></th>
-                            <th><input value="<%= rs.getString("Zip_code") %>" name="Zip_code" readonly></th>
-                            <th><input value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved" readonly></th>
-                            <th><input type="text" name="New_Year"></th>
-                            <th><input type="text" name="New_Title"></th>
-                            <th><input type="text" name="New_Quarter"></th>
-                            <th><input type="text" name="New_Zip_code"></th>
-                            <th><input type="text" name="New_Grade_Achieved"></th>
+                            <th><input value="<%= rs.getString("SSN") %>" name="SSN"></th>
+                            <th><input value="<%= rs.getInt("Year") %>" name="Year"></th>
+                            <th><input value="<%= rs.getString("Title") %>" name="Title"></th>
+                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                            <th><input value="<%= rs.getString("Zip_code") %>" name="Zip_code"></th>
+                            <th><input value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved"></th>
                             <th><input type="submit" value="Update"></th>
                         </form>
                         <form action="enrolled_in.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getString("SSN") %>" name="SSN" readonly></th>
-                            <th><input value="<%= rs.getInt("Year") %>" name="Year" readonly></th>
-                            <th><input value="<%= rs.getString("Title") %>" name="Title" readonly></th>
-                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter" readonly></th>
-                            <th><input value="<%= rs.getString("Zip_code") %>" name="Zip_code" readonly></th>
-                            <th><input value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved" readonly></th>
+                            <th><input type="hidden" value="<%= rs.getString("SSN") %>" name="SSN"></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Year") %>" name="Year"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Title") %>" name="Title"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Zip_code") %>" name="Zip_code"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

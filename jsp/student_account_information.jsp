@@ -106,7 +106,7 @@
                     <tr>
                         <form action="student_account_information.jsp" method="get">
                             <input type="hidden" value="update" name="action">
-                            <th><input value="<%= rs.getString("SSN") %>" name="SSN" readonly></th>
+                            <th><input value="<%= rs.getString("SSN") %>" name="SSN"></th>
                             <th><input value="<%= rs.getString("Street") %>" name="Street"></th>
                             <th><input value="<%= rs.getString("City") %>" name="City"></th>
                             <th><input value="<%= rs.getString("State") %>" name="State"></th>
@@ -115,12 +115,12 @@
                         </form>
                         <form action="student_account_information.jsp" method="get">
                             <input type="hidden" value="delete" name="action">
-                            <th><input value="<%= rs.getString("SSN") %>" name="SSN" readonly></th>
-                            <th><input value="<%= rs.getString("Street") %>" name="Street" readonly></th>
-                            <th><input value="<%= rs.getString("City") %>" name="City" readonly></th>
-                            <th><input value="<%= rs.getString("State") %>" name="State" readonly></th>
-                            <th><input value="<%= rs.getString("Zip_code") %>" name="Zip_code" readonly></th>
-                            <th><input type="submit" value="Delete"></th>
+                            <th><input type="hidden" value="<%= rs.getString("SSN") %>" name="SSN"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Street") %>" name="Street"></th>
+                            <th><input type="hidden" value="<%= rs.getString("City") %>" name="City"></th>
+                            <th><input type="hidden" value="<%= rs.getString("State") %>" name="State"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Zip_code") %>" name="Zip_code"></th>
+                            <td><input type="submit" value="Delete"></td>
                         </form>
                     </tr>
                 <%

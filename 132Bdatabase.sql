@@ -1,4 +1,3 @@
--- Creating tables for Student information
 CREATE TABLE Student (
     SSN VARCHAR(10) PRIMARY KEY,
     First_name VARCHAR(50),
@@ -39,7 +38,6 @@ CREATE TABLE Precandidacy (
     FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
--- Creating tables for Academic information
 CREATE TABLE Category (
     Category_name VARCHAR(100) PRIMARY KEY,
     Minimum_average_grade FLOAT,
@@ -51,8 +49,8 @@ CREATE TABLE Degree (
     Degree_Type VARCHAR(50),
     University VARCHAR(100),
     Total_units INT,
-    PRIMARY KEY (Degree_name), -- Assuming Degree_name is unique for each degree
-    CONSTRAINT unique_degree_info UNIQUE (Degree_name, Degree_Type, University) -- Unique constraint for Degree_Type and University combination
+    PRIMARY KEY (Degree_name), 
+    CONSTRAINT unique_degree_info UNIQUE (Degree_name, Degree_Type, University) 
 );
 
 CREATE TABLE Department (
@@ -132,7 +130,6 @@ CREATE TABLE Faculty (
     PRIMARY KEY (First_name, Middle_name, Last_name)
 );
 
--- Creating tables for Account information
 CREATE TABLE Account_information (
     SSN VARCHAR(10) PRIMARY KEY,
     Street VARCHAR(100),
@@ -148,7 +145,6 @@ CREATE TABLE Account_information (
     FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
--- Creating additional tables for relationships
 CREATE TABLE Advises (
     SSN VARCHAR(10),
     First_Name VARCHAR(50),
@@ -194,11 +190,19 @@ CREATE TABLE Enrolled_In (
     Year INT,
     Title VARCHAR(100),
     Quarter VARCHAR(50),
-    Zip_code VARCHAR(20),
     Grade_Achieved VARCHAR(10),
+    Course_number INT, 
+    Class_Title VARCHAR(100), 
+    Class_Quarter VARCHAR(50),
+    Class_Year INT, 
+    Section_id INT,  
     PRIMARY KEY (SSN, Year, Title, Quarter),
-    FOREIGN KEY (SSN) REFERENCES Student(SSN)
+    FOREIGN KEY (SSN) REFERENCES Student(SSN),
+    FOREIGN KEY (Course_number) REFERENCES Course(Course_number),
+    FOREIGN KEY (Course_number, Class_Title, Class_Quarter, Class_Year) REFERENCES Class(Course_number, Title, Quarter, Year),
+    FOREIGN KEY (Section_id) REFERENCES Section(Section_id)
 );
+
 
 CREATE TABLE Offered_As (
     Course_Number INT,
