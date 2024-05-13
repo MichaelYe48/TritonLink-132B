@@ -1,3 +1,4 @@
+<%@ page language="java" import="java.sql.*" %>
 <html>
 <body>
     <table>
@@ -6,95 +7,66 @@
                 <jsp:include page="menu.html" />
             </td>
             <td>
-                <%@ page language="java" import="java.sql.*" %>
                 <%
-                    String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
-                    String username = "dylanolivares";
-                    String password = "dylanolivares";
+                String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
+                String username = "dylanolivares";
+                String password = "dylanolivares";
 
-                    Connection connection = null;
-                    Statement statement = null;
-                    ResultSet rs = null;
+                Connection connection = null;
+                Statement statement = null;
+                ResultSet rs = null;
 
-                    // Try to establish a connection to the database
-                    try {
-                        // Load the PostgreSQL JDBC driver class
-                        Class.forName("org.postgresql.Driver");
+                try {
+                    Class.forName("org.postgresql.Driver");
+                    connection = DriverManager.getConnection(jdbcUrl, username, password);
 
-                        // Create a connection to the database
-                        connection = DriverManager.getConnection(jdbcUrl, username, password);
+                    String action = request.getParameter("action");
 
-                        // Insert
-                        // Check if an insertion is requested
-                        String action = request.getParameter("action");
-                        if (action != null && action.equals("insert")) {
-                            // Check if the record already exists
-                            PreparedStatement checkStmt = connection.prepareStatement(
-                                "SELECT COUNT(*) FROM Meeting WHERE Section_id = ? AND Start_date = ? AND Start_time = ?");
-                            checkStmt.setInt(1, Integer.parseInt(request.getParameter("Section_id")));
-                            checkStmt.setDate(2, java.sql.Date.valueOf(request.getParameter("Start_date")));
-                            checkStmt.setTime(3, java.sql.Time.valueOf(request.getParameter("Start_time")));
-                            ResultSet checkResult = checkStmt.executeQuery();
-                            checkResult.next();
-                            int count = checkResult.getInt(1);
-                            checkStmt.close();
-                            
-                            if (count == 0) { // If record doesn't exist, then insert
-                                PreparedStatement pstmt = connection.prepareStatement(
-                                    "INSERT INTO Meeting (Section_id, Meeting_type, Location, Mandatory, Meeting_frequency, Start_date, End_date, Start_time, End_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-                                pstmt.setInt(1, Integer.parseInt(request.getParameter("Section_id")));
-                                pstmt.setString(2, request.getParameter("Meeting_type"));
-                                pstmt.setString(3, request.getParameter("Location"));
-                                pstmt.setBoolean(4, Boolean.parseBoolean(request.getParameter("Mandatory")));
-                                pstmt.setString(5, request.getParameter("Meeting_frequency"));
-                                pstmt.setDate(6, java.sql.Date.valueOf(request.getParameter("Start_date")));
-                                pstmt.setDate(7, java.sql.Date.valueOf(request.getParameter("End_date")));
-                                pstmt.setTime(8, java.sql.Time.valueOf(request.getParameter("Start_time")));
-                                pstmt.setTime(9, java.sql.Time.valueOf(request.getParameter("End_time")));
-                                pstmt.executeUpdate();
-                                pstmt.close();
-                            } else {
-                                out.println("Record already exists!");
-                            }
-                        }
+                    if (action != null && action.equals("insert")) {
+                        PreparedStatement pstmt = connection.prepareStatement(
+                            "INSERT INTO Meeting (Section_id, Meeting_type, Location, Mandatory, Meeting_frequency, Start_date, End_date, Start_time, End_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                        pstmt.setInt(1, Integer.parseInt(request.getParameter("Section_id")));
+                        pstmt.setString(2, request.getParameter("Meeting_type"));
+                        pstmt.setString(3, request.getParameter("Location"));
+                        pstmt.setBoolean(4, request.getParameter("Mandatory") != null && request.getParameter("Mandatory").equals("on"));
+                        pstmt.setString(5, request.getParameter("Meeting_frequency"));
+                        pstmt.setDate(6, Date.valueOf(request.getParameter("Start_date")));
+                        pstmt.setDate(7, Date.valueOf(request.getParameter("End_date")));
+                        pstmt.setTime(8, Time.valueOf(request.getParameter("Start_time")));
+                        pstmt.setTime(9, Time.valueOf(request.getParameter("End_time")));
+                        pstmt.executeUpdate();
+                        pstmt.close();
+                    }
 
+                    if (action != null && action.equals("update")) {
+                        PreparedStatement pstmt = connection.prepareStatement(
+                            "UPDATE Meeting SET Meeting_type = ?, Location = ?, Mandatory = ?, Meeting_frequency = ?, End_date = ?, End_time = ? WHERE Section_id = ? AND Start_date = ? AND Start_time = ?");
+                        pstmt.setString(1, request.getParameter("Meeting_type"));
+                        pstmt.setString(2, request.getParameter("Location"));
+                        pstmt.setBoolean(3, request.getParameter("Mandatory") != null && request.getParameter("Mandatory").equals("on"));
+                        pstmt.setString(4, request.getParameter("Meeting_frequency"));
+                        pstmt.setDate(5, Date.valueOf(request.getParameter("End_date")));
+                        pstmt.setTime(6, Time.valueOf(request.getParameter("End_time")));
+                        pstmt.setInt(7, Integer.parseInt(request.getParameter("Section_id")));
+                        pstmt.setDate(8, Date.valueOf(request.getParameter("Start_date")));
+                        pstmt.setTime(9, Time.valueOf(request.getParameter("Start_time")));
+                        pstmt.executeUpdate();
+                        pstmt.close();
+                    }
 
-                        // Update
-                        // Check if an update is requested
-                        if (action != null && action.equals("update")) {
-                            // Create the prepared statement and use it to
-                            // UPDATE the Meeting attributes in the Meeting table.
-                            PreparedStatement pstatement = connection.prepareStatement(
-                                "UPDATE Meeting SET Meeting_type = ?, Location = ?, Mandatory = ?, Meeting_frequency = ?, End_date = ?, End_time = ? WHERE Section_id = ? AND Start_date = ? AND Start_time = ?");
-                            pstatement.setString(1, request.getParameter("Meeting_type"));
-                            pstatement.setString(2, request.getParameter("Location"));
-                            pstatement.setBoolean(3, Boolean.parseBoolean(request.getParameter("Mandatory")));
-                            pstatement.setString(4, request.getParameter("Meeting_frequency"));
-                            pstatement.setDate(5, java.sql.Date.valueOf(request.getParameter("End_date")));
-                            pstatement.setTime(6, java.sql.Time.valueOf(request.getParameter("End_time")));
-                            pstatement.setInt(7, Integer.parseInt(request.getParameter("Section_id")));
-                            pstatement.setDate(8, java.sql.Date.valueOf(request.getParameter("Start_date")));
-                            pstatement.setTime(9, java.sql.Time.valueOf(request.getParameter("Start_time")));
-                            pstatement.executeUpdate();
-                            pstatement.close();
-                        }
+                    if (action != null && action.equals("delete")) {
+                        PreparedStatement pstmt = connection.prepareStatement(
+                            "DELETE FROM Meeting WHERE Section_id = ? AND Start_date = ? AND Start_time = ?");
+                        pstmt.setInt(1, Integer.parseInt(request.getParameter("Section_id")));
+                        pstmt.setDate(2, Date.valueOf(request.getParameter("Start_date")));
+                        pstmt.setTime(3, Time.valueOf(request.getParameter("Start_time")));
+                        pstmt.executeUpdate();
+                        pstmt.close();
+                    }
 
-                        // Delete
-                        // Check if a delete is requested
-                        if (action != null && action.equals("delete")) {
-                            PreparedStatement pstmt1 = connection.prepareStatement(
-                                "DELETE FROM Meeting WHERE Section_id = ? AND Start_date = ? AND Start_time = ?");
-                            pstmt1.setInt(1, Integer.parseInt(request.getParameter("Section_id")));
-                            pstmt1.setDate(2, java.sql.Date.valueOf(request.getParameter("Start_date")));
-                            pstmt1.setTime(3, java.sql.Time.valueOf(request.getParameter("Start_time")));
-                            pstmt1.executeUpdate();
-                            pstmt1.close();
-                        }
-
-                        // Create the statement
-                        statement = connection.createStatement();
-                        rs = statement.executeQuery("SELECT * FROM Meeting");
-                    %>
+                    statement = connection.createStatement();
+                    rs = statement.executeQuery("SELECT * FROM Meeting");
+                %>
                 <table>
                     <tr>
                         <th>Section ID</th>
@@ -113,7 +85,7 @@
                             <th><input value="" name="Section_id" size="15"></th>
                             <th><input value="" name="Meeting_type" size="15"></th>
                             <th><input value="" name="Location" size="15"></th>
-                            <th><input value="" name="Mandatory" size="15"></th>
+                            <th><input type="checkbox" name="Mandatory"></th>
                             <th><input value="" name="Meeting_frequency" size="15"></th>
                             <th><input value="" name="Start_date" size="15"></th>
                             <th><input value="" name="End_date" size="15"></th>
@@ -123,7 +95,6 @@
                         </form>
                     </tr>
                     <%
-                    // Iterate over the ResultSet
                     while (rs.next()) {
                     %>
                     <tr>
@@ -132,7 +103,7 @@
                             <th><input value="<%= rs.getInt("Section_id") %>" name="Section_id"></th>
                             <th><input value="<%= rs.getString("Meeting_type") %>" name="Meeting_type"></th>
                             <th><input value="<%= rs.getString("Location") %>" name="Location"></th>
-                            <th><input value="<%= rs.getBoolean("Mandatory") %>" name="Mandatory"></th>
+                            <th><input type="checkbox" name="Mandatory" <%= rs.getBoolean("Mandatory") ? "checked" : "" %>></th>
                             <th><input value="<%= rs.getString("Meeting_frequency") %>" name="Meeting_frequency"></th>
                             <th><input value="<%= rs.getDate("Start_date") %>" name="Start_date"></th>
                             <th><input value="<%= rs.getDate("End_date") %>" name="End_date"></th>
@@ -153,12 +124,9 @@
                     %>
                 </table>
                 <%
-                    // Close the ResultSet
-                    rs.close();
-                    // Close the Statement
-                    statement.close();
-                    // Close the Connection
-                    connection.close();
+                rs.close();
+                statement.close();
+                connection.close();
                 } catch (SQLException sqle) {
                     out.println("SQL Exception: " + sqle.getMessage());
                     sqle.printStackTrace();
