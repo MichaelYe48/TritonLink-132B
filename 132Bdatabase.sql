@@ -191,16 +191,8 @@ CREATE TABLE Enrolled_In (
     Title VARCHAR(100),
     Quarter VARCHAR(50),
     Grade_Achieved VARCHAR(10),
-    Course_number INT, 
-    Class_Title VARCHAR(100), 
-    Class_Quarter VARCHAR(50),
-    Class_Year INT, 
-    Section_id INT,  
     PRIMARY KEY (SSN, Year, Title, Quarter),
-    FOREIGN KEY (SSN) REFERENCES Student(SSN),
-    FOREIGN KEY (Course_number) REFERENCES Course(Course_number),
-    FOREIGN KEY (Course_number, Class_Title, Class_Quarter, Class_Year) REFERENCES Class(Course_number, Title, Quarter, Year),
-    FOREIGN KEY (Section_id) REFERENCES Section(Section_id)
+    FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
 
@@ -315,7 +307,7 @@ CREATE TABLE Thesis_Committee (
     Middle_Name VARCHAR(50),
     Last_Name VARCHAR(50),
     PRIMARY KEY (SSN, First_Name, Middle_Name, Last_Name),
-    FOREIGN KEY (SSN) REFERENCES Student(SSN)
+    FOREIGN KEY (SSN) REFERENCES Student(SSN),
     FOREIGN KEY (First_Name, Middle_Name, Last_Name) REFERENCES Faculty(First_name, Middle_name, Last_name)
 );
 

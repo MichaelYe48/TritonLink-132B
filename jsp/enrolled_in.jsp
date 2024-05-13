@@ -7,7 +7,7 @@
             </td>
             <td>
                 <%@ page language="java" import="java.sql.*" %>
-                    <%
+                <%
                     String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
                     String username = "dylanolivares";
                     String password = "dylanolivares";
@@ -15,15 +15,15 @@
                     Connection connection = null;
                     Statement statement = null;
                     ResultSet rs = null;
-            
+
                     // Try to establish a connection to the database
                     try {
                         // Load the PostgreSQL JDBC driver class
                         Class.forName("org.postgresql.Driver");
-            
+
                         // Create a connection to the database
                         connection = DriverManager.getConnection(jdbcUrl, username, password);
-                        
+
                         // Insert
                         // Check if an insertion is requested
                         String action = request.getParameter("action");
@@ -42,13 +42,12 @@
                             
                             if (count == 0) { // If record doesn't exist, then insert
                                 PreparedStatement pstmt = connection.prepareStatement(
-                                    "INSERT INTO Enrolled_In (SSN, Year, Title, Quarter, Zip_code, Grade_Achieved) VALUES (?, ?, ?, ?, ?, ?)");
+                                    "INSERT INTO Enrolled_In (SSN, Year, Title, Quarter, Grade_Achieved) VALUES (?, ?, ?, ?, ?)");
                                 pstmt.setString(1, request.getParameter("SSN"));
                                 pstmt.setInt(2, Integer.parseInt(request.getParameter("Year")));
                                 pstmt.setString(3, request.getParameter("Title"));
                                 pstmt.setString(4, request.getParameter("Quarter"));
-                                pstmt.setString(5, request.getParameter("Zip_code"));
-                                pstmt.setString(6, request.getParameter("Grade_Achieved"));
+                                pstmt.setString(5, request.getParameter("Grade_Achieved"));
                                 pstmt.executeUpdate();
                                 pstmt.close();
                             } else {
@@ -60,16 +59,15 @@
                         // Check if an update is requested
                         if (action != null && action.equals("update")) {
                             PreparedStatement pstmt = connection.prepareStatement(
-                                "UPDATE Enrolled_In SET Year = ?, Title = ?, Quarter = ?, Zip_code = ?, Grade_Achieved = ? WHERE SSN = ? AND Year = ? AND Title = ? AND Quarter = ?");
-                            pstmt.setInt(1, Integer.parseInt(request.getParameter("New_Year")));
+                                "UPDATE Enrolled_In SET Year = ?, Title = ?, Quarter = ?, Grade_Achieved = ? WHERE SSN = ? AND Year = ? AND Title = ? AND Quarter = ?");
+                            pstmt.setInt(1, Integer.parseInt(request.getParameter("Year")));
                             pstmt.setString(2, request.getParameter("Title"));
                             pstmt.setString(3, request.getParameter("Quarter"));
-                            pstmt.setString(4, request.getParameter("Zip_code"));
-                            pstmt.setString(5, request.getParameter("Grade_Achieved"));
-                            pstmt.setString(6, request.getParameter("SSN"));
-                            pstmt.setInt(7, Integer.parseInt(request.getParameter("Year")));
-                            pstmt.setString(8, request.getParameter("Title"));
-                            pstmt.setString(9, request.getParameter("Quarter"));
+                            pstmt.setString(4, request.getParameter("Grade_Achieved"));
+                            pstmt.setString(5, request.getParameter("SSN"));
+                            pstmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
+                            pstmt.setString(7, request.getParameter("Title"));
+                            pstmt.setString(8, request.getParameter("Quarter"));
                             pstmt.executeUpdate();
                             pstmt.close();
                         }
@@ -97,7 +95,6 @@
                         <th>Year</th>
                         <th>Title</th>
                         <th>Quarter</th>
-                        <th>Zip Code</th>
                         <th>Grade Achieved</th>
                     </tr>
                     <tr>
@@ -107,7 +104,6 @@
                             <th><input value="" name="Year" size="15"></th>
                             <th><input value="" name="Title" size="15"></th>
                             <th><input value="" name="Quarter" size="15"></th>
-                            <th><input value="" name="Zip_code" size="15"></th>
                             <th><input value="" name="Grade_Achieved" size="15"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
@@ -123,7 +119,6 @@
                             <th><input value="<%= rs.getInt("Year") %>" name="Year"></th>
                             <th><input value="<%= rs.getString("Title") %>" name="Title"></th>
                             <th><input value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
-                            <th><input value="<%= rs.getString("Zip_code") %>" name="Zip_code"></th>
                             <th><input value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved"></th>
                             <th><input type="submit" value="Update"></th>
                         </form>
@@ -133,25 +128,21 @@
                             <th><input type="hidden" value="<%= rs.getInt("Year") %>" name="Year"></th>
                             <th><input type="hidden" value="<%= rs.getString("Title") %>" name="Title"></th>
                             <th><input type="hidden" value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
-                            <th><input type="hidden" value="<%= rs.getString("Zip_code") %>" name="Zip_code"></th>
                             <th><input type="hidden" value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>
-                <%
+                    <%
                     }
-                
-                %>
-
+                    %>
                 </table>
-
                 <%
-                // Close the ResultSet
-                rs.close();
-                // Close the Statement
-                statement.close();
-                // Close the Connection
-                connection.close();
+                    // Close the ResultSet
+                    rs.close();
+                    // Close the Statement
+                    statement.close();
+                    // Close the Connection
+                    connection.close();
                 } catch (SQLException sqle) {
                     out.println("SQL Exception: " + sqle.getMessage());
                     sqle.printStackTrace();
