@@ -79,7 +79,7 @@
                         <th>SSN</th>
                     </tr>
                     <tr>
-                        <form action="precandidacy.jsp" method="get">
+                        <form action="precandidacy_students.jsp" method="get">
                             <input type="hidden" value="insert" name="action">
                             <th><input value="" name="SSN" size="15"></th>
                             <th><input type="submit" value="Insert"></th>
