@@ -155,15 +155,15 @@ CREATE TABLE Advises (
     FOREIGN KEY (First_Name, Middle_Name, Last_Name) REFERENCES Faculty(First_name, Middle_name, Last_name)
 );
 
-CREATE TABLE Is_On_Probation (
-    SSN VARCHAR(10),
-    Probation_Start_Quarter VARCHAR(50),
-    Probation_End_Quarter VARCHAR(50),
-    Probation_Start_Year INT,
-    Probation_End_Year INT,
-    PRIMARY KEY (SSN, Probation_Start_Quarter, Probation_End_Quarter, Probation_Start_Year, Probation_End_Year),
-    FOREIGN KEY (SSN) REFERENCES Student(SSN)
-);
+-- CREATE TABLE Is_On_Probation (
+--     SSN VARCHAR(10),
+--     Probation_Start_Quarter VARCHAR(50),
+--     Probation_End_Quarter VARCHAR(50),
+--     Probation_Start_Year INT,
+--     Probation_End_Year INT,
+--     PRIMARY KEY (SSN, Probation_Start_Quarter, Probation_End_Quarter, Probation_Start_Year, Probation_End_Year),
+--     FOREIGN KEY (SSN) REFERENCES Student(SSN)
+-- );
 
 CREATE TABLE Dates_Attended (
     SSN VARCHAR(10),
