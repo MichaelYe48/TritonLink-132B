@@ -304,10 +304,11 @@ CREATE TABLE Taught_By (
 
 CREATE TABLE Thesis_Committee (
     SSN VARCHAR(10),
+    Thesis_Id INT,
     First_Name VARCHAR(50),
     Middle_Name VARCHAR(50),
     Last_Name VARCHAR(50),
-    PRIMARY KEY (SSN, First_Name, Middle_Name, Last_Name),
+    PRIMARY KEY (SSN, Thesis_Id, First_Name, Middle_Name, Last_Name),
     FOREIGN KEY (SSN) REFERENCES Student(SSN),
     FOREIGN KEY (First_Name, Middle_Name, Last_Name) REFERENCES Faculty(First_name, Middle_name, Last_name)
 );
