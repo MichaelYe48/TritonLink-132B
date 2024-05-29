@@ -190,6 +190,7 @@ CREATE TABLE Enrolled_In (
     Year INT,
     Title VARCHAR(100),
     Quarter VARCHAR(50),
+    "Taken" BOOLEAN,
     Grade_Achieved VARCHAR(10),
     PRIMARY KEY (SSN, Year, Title, Quarter),
     FOREIGN KEY (SSN) REFERENCES Student(SSN)

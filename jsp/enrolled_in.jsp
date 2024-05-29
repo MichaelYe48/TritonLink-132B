@@ -95,6 +95,7 @@
                         <th>Year</th>
                         <th>Title</th>
                         <th>Quarter</th>
+                        <th>Taken</th>
                         <th>Grade Achieved</th>
                     </tr>
                     <tr>
@@ -104,6 +105,7 @@
                             <th><input value="" name="Year" size="15"></th>
                             <th><input value="" name="Title" size="15"></th>
                             <th><input value="" name="Quarter" size="15"></th>
+                            <th><input type="checkbox" name="Taken"></th>
                             <th><input value="" name="Grade_Achieved" size="15"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
@@ -119,6 +121,7 @@
                             <th><input value="<%= rs.getInt("Year") %>" name="Year"></th>
                             <th><input value="<%= rs.getString("Title") %>" name="Title"></th>
                             <th><input value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                            <th><input type="checkbox" name="Taken" <%= rs.getBoolean("Taken") ? "checked" : "" %>></th>
                             <th><input value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved"></th>
                             <th><input type="submit" value="Update"></th>
                         </form>
