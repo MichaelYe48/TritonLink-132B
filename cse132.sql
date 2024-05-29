@@ -187,13 +187,15 @@ CREATE TABLE Student_Account_Information (
 
 CREATE TABLE Enrolled_In (
     SSN VARCHAR(10),
-    Year INT,
+    Course_Number INT,
     Title VARCHAR(100),
-    Quarter VARCHAR(50),
-    "Taken" BOOLEAN,
+    Section_id INT,
+    Taken BOOLEAN,
     Grade_Achieved VARCHAR(10),
-    PRIMARY KEY (SSN, Year, Title, Quarter),
-    FOREIGN KEY (SSN) REFERENCES Student(SSN)
+    PRIMARY KEY (SSN, Course_Number, Title, Section_id),
+    FOREIGN KEY (SSN) REFERENCES Student(SSN),
+    FOREIGN KEY (Course_number) REFERENCES Course(Course_number),
+    FOREIGN KEY (Section_id) REFERENCES Section(Section_id)
 );
 
 
