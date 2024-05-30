@@ -49,6 +49,8 @@ CREATE TABLE Degree (
     Degree_Type VARCHAR(50),
     University VARCHAR(100),
     Total_units INT,
+    Lower_div_units INT,
+    Upper_div_units INT,
     PRIMARY KEY (Degree_name), 
     CONSTRAINT unique_degree_info UNIQUE (Degree_name, Degree_Type, University) 
 );

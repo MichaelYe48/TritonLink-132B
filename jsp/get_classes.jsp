@@ -14,7 +14,7 @@
         
         while (rs.next()) {
 %>
-<option value="<%= rs.getString("Title") %>"><%= rs.getString("Title") %></option>
+<option value="<%= rs.getString("Title") %>"><%= rs.getString("Title") %> - <%= rs.getString("Quarter") %> <%= rs.getInt("Year") %></option>
 <%
         }
         rs.close();
