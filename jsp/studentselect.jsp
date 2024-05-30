@@ -1,5 +1,7 @@
+<!DOCTYPE html>
 <html>
 <head>
+    <title>Student Enrollment</title>
 </head>
 <body>
     <table>
@@ -19,34 +21,44 @@
                     ResultSet rs = null;
                     ResultSet rs2 = null;
                     Statement statement2 = null;
-                    out.println("oink");
 
-                    // Try to establish a connection to the database
                     try {
                         // Load the PostgreSQL JDBC driver class
                         Class.forName("org.postgresql.Driver");
 
                         // Create a connection to the database
                         connection = DriverManager.getConnection(jdbcUrl, username, password);
-                        out.println("that");
-                        String action = request.getParameter("action");
-                        if (action != null && action.equals("Submit")) {
-                            out.println("this");
-                            PreparedStatement pstmt = connection.prepareStatement(
-                                "SELECT * FROM Enrolled_In WHERE SSN = ?");
-                            pstmt.setString(1, request.getParameter("SSN"));
-                            pstmt.executeUpdate();
-                            pstmt.close();
-                        }
-                        out.println("those");
-                        // Create the statement
+
+                        // Create the statements
                         statement = connection.createStatement();
                         statement2 = connection.createStatement();
-                        //rs = statement.executeQuery("SELECT * FROM ");
-                    %>
+
+                        String action = request.getParameter("action");
+                        String studentSSN = request.getParameter("Student");
+
+                        if (action != null && action.equals("Submit") && studentSSN != null) {
+                            // Query to get the classes taken by the student
+                            String query = "SELECT c.Course_number, c.Title, c.Quarter, c.Year, co.Units, s.Section_id " +
+                                           "FROM Class c " +
+                                           "JOIN Enrolled_In e ON c.Course_number = e.Course_number AND c.Title = e.Title AND c.Quarter = e.Quarter AND c.Year = e.Year " +
+                                           "JOIN Course co ON c.Course_number = co.Course_number " +
+                                           "JOIN Section s ON e.Section_id = s.Section_id " +
+                                           "WHERE e.SSN = ? AND e.Quarter = 'Spring' AND e.Year = 2018";
+                            PreparedStatement pstmt = connection.prepareStatement(query);
+                            pstmt.setString(1, studentSSN);
+                            rs = pstmt.executeQuery();
+                        }
+
+                        // Query to get the list of students
+                        String studentQuery = "SELECT DISTINCT s.SSN AS SSN, s.First_name AS FIRSTNAME, s.Middle_Name AS MIDDLENAME, s.Last_Name AS LASTNAME " +
+                                              "FROM Student s " +
+                                              "JOIN Enrolled_In e ON s.SSN = e.SSN " +
+                                              "WHERE e.Quarter = 'Spring' AND e.Year = 2018";
+                        rs2 = statement2.executeQuery(studentQuery);
+                %>
                 <table>
                     <tr>
-                        <th>Student</th>
+                        <th>Select Student</th>
                     </tr>
                     <tr>
                         <form action="studentselect.jsp" method="get">
@@ -54,7 +66,6 @@
                             <th>
                                 <select id="student" name="Student">
                                     <%
-                                        rs2 = statement2.executeQuery("SELECT DISTINCT s.SSN AS SSN, s.First_name AS FIRSTNAME, s.Middle_Name AS MIDDLENAME, s.Last_Name AS LASTNAME FROM Student s, Enrolled_In e WHERE s.SSN = e.SSN AND e.Quarter = 'SPRING' AND e.Year = 2018");
                                         while (rs2.next()) {
                                     %>
                                     <option value="<%= rs2.getString("SSN") %>"><%= rs2.getString("SSN") %> <%= rs2.getString("FIRSTNAME") %> <%= rs2.getString("MIDDLENAME") %> <%= rs2.getString("LASTNAME") %></option>
@@ -67,21 +78,43 @@
                         </form>
                     </tr>
                 </table>
-                <table>
+
+                <%
+                    if (action != null && action.equals("Submit") && rs != null) {
+                %>
+                <table border="1">
                     <tr>
-                        <th>Student</th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
-                        <th></th>
+                        <th>Course Number</th>
+                        <th>Title</th>
+                        <th>Units</th>
+                        <th>Section ID</th>
+                        <th>Quarter</th>
+                        <th>Year</th>
                     </tr>
+                    <%
+                        while (rs.next()) {
+                    %>
+                    <tr>
+                        <td><%= rs.getInt("Course_number") %></td>
+                        <td><%= rs.getString("Title") %></td>
+                        <td><%= rs.getInt("Units") %></td>
+                        <td><%= rs.getInt("Section_id") %></td>
+                        <td><%= rs.getString("Quarter") %></td>
+                        <td><%= rs.getInt("Year") %></td>
+                    </tr>
+                    <%
+                        }
+                    %>
                 </table>
                 <%
-                    rs2.close();
-                    rs.close();
-                    statement.close();
-                    statement2.close();
-                    connection.close();
+                    }
+
+                    // Close resources
+                    if (rs != null) rs.close();
+                    if (rs2 != null) rs2.close();
+                    if (statement != null) statement.close();
+                    if (statement2 != null) statement2.close();
+                    if (connection != null) connection.close();
                 } catch (SQLException sqle) {
                     out.println("SQL Exception: " + sqle.getMessage());
                     sqle.printStackTrace();

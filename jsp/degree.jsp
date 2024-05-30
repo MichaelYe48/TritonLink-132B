@@ -21,7 +21,6 @@
                         connection = DriverManager.getConnection(jdbcUrl, username, password);
 
                         // Insert
-                        // Check if an insertion is requested
                         String action = request.getParameter("action");
                         if (action != null && action.equals("insert")) {
                             // Check if the record already exists
@@ -50,7 +49,6 @@
                         }
 
                         // Update
-                        // Check if an update is requested
                         if (action != null && action.equals("update")) {
                             PreparedStatement pstatement = connection.prepareStatement(
                                 "UPDATE Degree SET Degree_Type = ?, University = ?, Total_units = ?, Lower_div_units = ?, Upper_div_units = ? WHERE Degree_name = ?");
@@ -65,7 +63,6 @@
                         }
 
                         // Delete
-                        // Check if a delete is requested
                         if (action != null && action.equals("delete")) {
                             PreparedStatement pstmt1 = connection.prepareStatement(
                                 "DELETE FROM Degree WHERE Degree_name = ?");
