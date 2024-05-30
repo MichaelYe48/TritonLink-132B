@@ -1,47 +1,100 @@
-<%@ page language="java" import="java.sql.*" %>
 <html>
+<head>
+</head>
 <body>
-    <jsp:include page="menu.html" />
-    <h2>Select a Student</h2>
-    <form action="displayClasses.jsp" method="get">
-        <select name="SSN">
-            <option value="">Select a student</option>
-            <%
-                String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
-                String username = "dylanolivares";
-                String password = "dylanolivares";
+    <table>
+        <tr>
+            <td>
+                <jsp:include page="menu.html" />
+            </td>
+            <td>
+                <%@ page language="java" import="java.sql.*" %>
+                <%
+                    String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
+                    String username = "dylanolivares";
+                    String password = "dylanolivares";
 
-                Connection connection = null;
-                Statement statement = null;
-                ResultSet studentsRs = null;
+                    Connection connection = null;
+                    Statement statement = null;
+                    ResultSet rs = null;
+                    ResultSet rs2 = null;
+                    Statement statement2 = null;
+                    out.println("oink");
 
-                try {
-                    Class.forName("org.postgresql.Driver");
-                    connection = DriverManager.getConnection(jdbcUrl, username, password);
-                    statement = connection.createStatement();
-                    studentsRs = statement.executeQuery("SELECT s.SSN, s.First_name, s.Middle_name, s.Last_name FROM Student s JOIN Student_Enrollment se ON s.SSN = se.SSN WHERE se.Quarter = 'SPRING' AND se.Year = 2018");
-
-                    while (studentsRs.next()) {
-                        String ssn = studentsRs.getString("SSN");
-                        String firstName = studentsRs.getString("First_name");
-                        String middleName = studentsRs.getString("Middle_name");
-                        String lastName = studentsRs.getString("Last_name");
-                        out.println("<option value='" + ssn + "'>" + ssn + " - " + firstName + " " + middleName + " " + lastName + "</option>");
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
+                    // Try to establish a connection to the database
                     try {
-                        if (studentsRs != null) studentsRs.close();
-                        if (statement != null) statement.close();
-                        if (connection != null) connection.close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
+                        // Load the PostgreSQL JDBC driver class
+                        Class.forName("org.postgresql.Driver");
+
+                        // Create a connection to the database
+                        connection = DriverManager.getConnection(jdbcUrl, username, password);
+                        out.println("that");
+                        String action = request.getParameter("action");
+                        if (action != null && action.equals("Submit")) {
+                            out.println("this");
+                            PreparedStatement pstmt = connection.prepareStatement(
+                                "SELECT * FROM Enrolled_In WHERE SSN = ?");
+                            pstmt.setString(1, request.getParameter("SSN"));
+                            pstmt.executeUpdate();
+                            pstmt.close();
+                        }
+                        out.println("those");
+                        // Create the statement
+                        statement = connection.createStatement();
+                        statement2 = connection.createStatement();
+                        //rs = statement.executeQuery("SELECT * FROM ");
+                    %>
+                <table>
+                    <tr>
+                        <th>Student</th>
+                    </tr>
+                    <tr>
+                        <form action="studentselect.jsp" method="get">
+                            <input type="hidden" value="Submit" name="action">
+                            <th>
+                                <select id="student" name="Student">
+                                    <%
+                                        rs2 = statement2.executeQuery("SELECT DISTINCT s.SSN AS SSN, s.First_name AS FIRSTNAME, s.Middle_Name AS MIDDLENAME, s.Last_Name AS LASTNAME FROM Student s, Enrolled_In e WHERE s.SSN = e.SSN AND e.Quarter = 'SPRING' AND e.Year = 2018");
+                                        while (rs2.next()) {
+                                    %>
+                                    <option value="<%= rs2.getString("SSN") %>"><%= rs2.getString("SSN") %> <%= rs2.getString("FIRSTNAME") %> <%= rs2.getString("MIDDLENAME") %> <%= rs2.getString("LASTNAME") %></option>
+                                    <%
+                                        }
+                                    %>
+                                </select>
+                            </th>
+                            <th><input type="submit" value="Submit"></th>
+                        </form>
+                    </tr>
+                </table>
+                <table>
+                    <tr>
+                        <th>Student</th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </table>
+                <%
+                    rs2.close();
+                    rs.close();
+                    statement.close();
+                    statement2.close();
+                    connection.close();
+                } catch (SQLException sqle) {
+                    out.println("SQL Exception: " + sqle.getMessage());
+                    sqle.printStackTrace();
+                } catch (ClassNotFoundException cnfe) {
+                    out.println("Class Not Found Exception: " + cnfe.getMessage());
+                    cnfe.printStackTrace();
+                } catch (Exception e) {
+                    out.println("Exception: " + e.getMessage());
+                    e.printStackTrace();
                 }
-            %>
-        </select>
-        <input type="submit" value="Submit">
-    </form>
+                %>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
