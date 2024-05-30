@@ -8,8 +8,6 @@
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("class").innerHTML = this.responseText;
                     populateSections(); // Automatically populate sections when classes change
-                    populateQuarter();
-                    populateYear();
                 }
             };
             xhr.open("GET", "enrolled_helpers/get_classes.jsp?courseNumber=" + courseNumber, true);
@@ -23,6 +21,8 @@
             xhr.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("section").innerHTML = this.responseText;
+                    populateQuarter();
+                    populateYear();
                 }
             };
             xhr.open("GET", "enrolled_helpers/get_sections.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
@@ -32,26 +32,28 @@
         function populateQuarter() {
             var courseNumber = document.getElementById("course").value;
             var title = document.getElementById("class").value;
+            var sectionId = document.getElementById("section").value;
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("quarter").value = this.responseText;
                 }
             };
-            xhr.open("GET", "enrolled_helpers/get_quarter.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.open("GET", "enrolled_helpers/get_quarter.jsp?courseNumber=" + courseNumber + "&title=" + title + "&sectionId=" + sectionId, true);
             xhr.send();
         }
 
         function populateYear() {
             var courseNumber = document.getElementById("course").value;
             var title = document.getElementById("class").value;
+            var sectionId = document.getElementById("section").value;
             var xhr = new XMLHttpRequest();
             xhr.onreadystatechange = function() {
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("year").value = this.responseText;
                 }
             };
-            xhr.open("GET", "enrolled_helpers/get_year.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.open("GET", "enrolled_helpers/get_year.jsp?courseNumber=" + courseNumber + "&title=" + title + "&sectionId=" + sectionId, true);
             xhr.send();
         }
     </script>
@@ -178,7 +180,7 @@
                                         rs2 = statement2.executeQuery("SELECT * FROM Course");
                                         while (rs2.next()) {
                                     %>
-                                    <option value="<%= rs2.getInt("Course_number") %>"><%= rs2.getString("Course_number") %></option>
+                                    <option value="<%= rs2.getInt("Course_number") %>"><%= rs2.getInt("Course_number") %></option>
                                     <%
                                         }
                                     %>
@@ -187,7 +189,7 @@
                             <th><select id="class" name="Title" onchange="populateSections()">
                             </select>
                             </th>
-                            <th><select id="section" name="Section_id"></select></th>
+                            <th><select id="section" name="Section_id" onchange="populateQuarter(); populateYear()"></select></th>
                             <th><input id="quarter" name="Quarter" size="15"></th>
                             <th><input id="year" name="Year" size="15"></th>
                             <th><input type="checkbox" name="Taken"></th>

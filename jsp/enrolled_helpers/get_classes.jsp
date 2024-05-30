@@ -8,7 +8,7 @@
     try {
         Class.forName("org.postgresql.Driver");
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement pstmt = connection.prepareStatement("SELECT * FROM Class WHERE Course_number = ?");
+        PreparedStatement pstmt = connection.prepareStatement("SELECT DISTINCT Title FROM Class WHERE Course_number = ?");
         pstmt.setInt(1, Integer.parseInt(courseNumber));
         ResultSet rs = pstmt.executeQuery();
         

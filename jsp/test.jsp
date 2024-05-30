@@ -1,30 +1,5 @@
-<%@ page language="java" import="java.sql.*" %>
-<%
-    String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
-    String username = "dylanolivares";
-    String password = "dylanolivares";
-
-    try {
-        Class.forName("org.postgresql.Driver");
-        Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        Statement statement = connection.createStatement();
-        ResultSet rs = statement.executeQuery("SELECT * FROM Course");
-%>
-<!DOCTYPE html>
 <html>
 <head>
-    <title>Course Management System</title>
-    <style>
-        label {
-            display: inline-block;
-            width: 150px;
-            margin-bottom: 10px;
-        }
-        select, input[type=text], input[type=number], input[type=checkbox], input[type=submit] {
-            width: 200px;
-            margin-bottom: 10px;
-        }
-    </style>
     <script>
         function populateClasses() {
             var courseNumber = document.getElementById("course").value;
@@ -33,9 +8,11 @@
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("class").innerHTML = this.responseText;
                     populateSections(); // Automatically populate sections when classes change
+                    populateQuarter();
+                    populateYear();
                 }
             };
-            xhr.open("GET", "get_classes.jsp?courseNumber=" + courseNumber, true);
+            xhr.open("GET", "enrolled_helpers/get_classes.jsp?courseNumber=" + courseNumber, true);
             xhr.send();
         }
 
@@ -48,7 +25,33 @@
                     document.getElementById("section").innerHTML = this.responseText;
                 }
             };
-            xhr.open("GET", "get_sections.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.open("GET", "enrolled_helpers/get_sections.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.send();
+        }
+
+        function populateQuarter() {
+            var courseNumber = document.getElementById("course").value;
+            var title = document.getElementById("class").value;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("quarter").value = this.responseText;
+                }
+            };
+            xhr.open("GET", "enrolled_helpers/get_quarter.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.send();
+        }
+
+        function populateYear() {
+            var courseNumber = document.getElementById("course").value;
+            var title = document.getElementById("class").value;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("year").value = this.responseText;
+                }
+            };
+            xhr.open("GET", "enrolled_helpers/get_year.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
             xhr.send();
         }
     </script>
@@ -60,99 +63,189 @@
                 <jsp:include page="menu.html" />
             </td>
             <td>
-                <form action="enrolled_in.jsp" method="get">
-                    <label for="course">Select Course:</label>
-                    <select id="course" name="course" onchange="populateClasses()">
-                        <%
-                            while (rs.next()) {
-                        %>
-                        <option value="<%= rs.getInt("Course_number") %>"><%= rs.getString("Course_consent") %> - <%= rs.getString("Grade_type") %></option>
-                        <%
+                <%@ page language="java" import="java.sql.*" %>
+                <%
+                    String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
+                    String username = "dylanolivares";
+                    String password = "dylanolivares";
+
+                    Connection connection = null;
+                    Statement statement = null;
+                    ResultSet rs = null;
+                    ResultSet rs2 = null;
+                    Statement statement2 = null;
+
+                    // Try to establish a connection to the database
+                    try {
+                        // Load the PostgreSQL JDBC driver class
+                        Class.forName("org.postgresql.Driver");
+
+                        // Create a connection to the database
+                        connection = DriverManager.getConnection(jdbcUrl, username, password);
+                        // Insert
+                        // Check if an insertion is requested
+                        String action = request.getParameter("action");
+                        if (action != null && action.equals("insert")) {
+                            // Check if the record already exists
+                            PreparedStatement checkStmt = connection.prepareStatement(
+                                "SELECT COUNT(*) FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
+                            checkStmt.setString(1, request.getParameter("SSN"));
+                            checkStmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
+                            checkStmt.setString(3, request.getParameter("Title"));
+                            checkStmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                            checkStmt.setString(5, request.getParameter("Quarter"));
+                            checkStmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
+                            ResultSet checkResult = checkStmt.executeQuery();
+                            checkResult.next();
+                            int count = checkResult.getInt(1);
+                            checkStmt.close();
+                            
+                            if (count == 0) { // If record doesn't exist, then insert
+                                PreparedStatement pstmt = connection.prepareStatement(
+                                    "INSERT INTO Enrolled_In (SSN, Course_number, Title, Section_id, Quarter, Year, Taken, Grade_Achieved) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                                pstmt.setString(1, request.getParameter("SSN"));
+                                pstmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
+                                pstmt.setString(3, request.getParameter("Title"));
+                                pstmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                                pstmt.setString(5, request.getParameter("Quarter"));
+                                pstmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
+                                boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
+                                pstmt.setBoolean(7, taken);
+                                pstmt.setString(8, request.getParameter("Grade_Achieved"));
+                                pstmt.executeUpdate();
+                                pstmt.close();
+                            } else {
+                                out.println("Record already exists!");
                             }
-                            rs.close();
-                        %>
-                    </select><br>
-                    <label for="class">Select Class:</label>
-                    <select id="class" name="class" onchange="populateSections()">
-                        <!-- populated dynamically using JavaScript -->
-                    </select><br>
-                    <label for="section">Select Section:</label>
-                    <select id="section" name="section">
-                        <!-- populated dynamically using JavaScript -->
-                    </select><br>
-                    <label for="SSN">Student SSN:</label>
-                    <input type="text" id="SSN" name="SSN" required><br>
-                    <label for="Year">Year:</label>
-                    <input type="number" id="Year" name="Year" required><br>
-                    <label for="Quarter">Quarter:</label>
-                    <input type="text" id="Quarter" name="Quarter" required><br>
-                    <label for="Taken">Taken:</label>
-                    <input type="checkbox" id="Taken" name="Taken"><br>
-                    <label for="Grade_Achieved">Grade Achieved:</label>
-                    <input type="text" id="Grade_Achieved" name="Grade_Achieved"><br>
-                    <input type="hidden" value="insert" name="action">
-                    <input type="submit" value="Insert">
-                </form>
+                        }
+
+                        // Update
+                        // Check if an update is requested
+                        if (action != null && action.equals("update")) {
+                            PreparedStatement pstmt = connection.prepareStatement(
+                                "UPDATE Enrolled_In SET Taken = ?, Grade_Achieved = ? WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
+                            boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
+                            pstmt.setBoolean(1, taken);
+                            pstmt.setString(2, request.getParameter("Grade_Achieved"));
+                            pstmt.setString(3, request.getParameter("SSN"));
+                            pstmt.setInt(4, Integer.parseInt(request.getParameter("Course_number")));
+                            pstmt.setString(5, request.getParameter("Title"));
+                            pstmt.setInt(6, Integer.parseInt(request.getParameter("Section_id")));
+                            pstmt.setString(7, request.getParameter("Quarter"));
+                            pstmt.setInt(8, Integer.parseInt(request.getParameter("Year")));
+                            pstmt.executeUpdate();
+                            pstmt.close();
+                        }
+
+                        // Delete
+                        // Check if a delete is requested
+                        if (action != null && action.equals("delete")) {
+                            PreparedStatement pstmt1 = connection.prepareStatement(
+                                "DELETE FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
+                            pstmt1.setString(1, request.getParameter("SSN"));
+                            pstmt1.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
+                            pstmt1.setString(3, request.getParameter("Title"));
+                            pstmt1.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                            pstmt1.setString(5, request.getParameter("Quarter"));
+                            pstmt1.setInt(6, Integer.parseInt(request.getParameter("Year")));
+                            pstmt1.executeUpdate();
+                            pstmt1.close();
+                        }
+
+                        // Create the statement
+                        statement = connection.createStatement();
+                        statement2 = connection.createStatement();
+                        rs = statement.executeQuery("SELECT * FROM Enrolled_In");
+                    %>
+                <table>
+                    <tr>
+                        <th>SSN</th>
+                        <th>Course</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Quarter</th>
+                        <th>Year</th>
+                        <th>Taken</th>
+                        <th>Grade Achieved</th>
+                    </tr>
+                    <tr>
+                        <form action="enrolled_in.jsp" method="get">
+                            <input type="hidden" value="insert" name="action">
+                            <th><input value="" name="SSN" size="15"></th>
+                            <th>
+                                <select id="course" name="Course_number" onchange="populateClasses()">
+                                    <%
+                                        rs2 = statement2.executeQuery("SELECT * FROM Course");
+                                        while (rs2.next()) {
+                                    %>
+                                    <option value="<%= rs2.getInt("Course_number") %>"><%= rs2.getString("Course_number") %></option>
+                                    <%
+                                        }
+                                    %>
+                                </select>
+                            </th>
+                            <th><select id="class" name="Title" onchange="populateSections()">
+                            </select>
+                            </th>
+                            <th><select id="section" name="Section_id"></select></th>
+                            <th><input id="quarter" name="Quarter" size="15"></th>
+                            <th><input id="year" name="Year" size="15"></th>
+                            <th><input type="checkbox" name="Taken"></th>
+                            <th><input value="" name="Grade_Achieved" size="15"></th>
+                            <th><input type="submit" value="Insert"></th>
+                        </form>
+                    </tr>
+                    <%
+                    // Iterate over the ResultSet
+                    while (rs.next()) {
+                    %>
+                    <tr>
+                        <form action="enrolled_in.jsp" method="get">
+                            <input type="hidden" value="update" name="action">
+                            <th><input value="<%= rs.getString("SSN") %>" name="SSN"></th>
+                            <th><input value="<%= rs.getString("Course_number") %>" name="Course_number"></th>
+                            <th><input value="<%= rs.getString("Title") %>" name="Title"></th>
+                            <th><input value="<%= rs.getInt("Section_id") %>" name="Section_id"></th>
+                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                            <th><input value="<%= rs.getInt("Year") %>" name="Year"></th>
+                            <th><input type="checkbox" name="Taken" <%= rs.getBoolean("Taken") ? "checked" : "" %>></th>
+                            <th><input value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved"></th>
+                            <th><input type="submit" value="Update"></th>
+                        </form>
+                        <form action="enrolled_in.jsp" method="get">
+                            <input type="hidden" value="delete" name="action">
+                            <th><input type="hidden" value="<%= rs.getString("SSN") %>" name="SSN"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Course_number") %>" name="Course_number"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Title") %>" name="Title"></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Section_id") %>" name="Section_id"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Year") %>" name="Year"></th>
+                            <th><input type="submit" value="Delete"></th>
+                        </form>
+                    </tr>
+                    <%
+                    }
+                    %>
+                </table>
+                <%
+                    rs2.close();
+                    rs.close();
+                    statement.close();
+                    statement2.close();
+                    connection.close();
+                } catch (SQLException sqle) {
+                    out.println("SQL Exception: " + sqle.getMessage());
+                    sqle.printStackTrace();
+                } catch (ClassNotFoundException cnfe) {
+                    out.println("Class Not Found Exception: " + cnfe.getMessage());
+                    cnfe.printStackTrace();
+                } catch (Exception e) {
+                    out.println("Exception: " + e.getMessage());
+                    e.printStackTrace();
+                }
+                %>
             </td>
         </tr>
     </table>
 </body>
 </html>
-<%
-    } catch (Exception e) {
-        out.println("Exception: " + e.getMessage());
-    }
-%>
-
-<%
-    // Handle form submission
-    if ("insert".equals(request.getParameter("action"))) {
-        String SSN = request.getParameter("SSN");
-        int Year = Integer.parseInt(request.getParameter("Year"));
-        String Title = request.getParameter("class");
-        String Quarter = request.getParameter("Quarter");
-        boolean Taken = request.getParameter("Taken") != null;
-        String Grade_Achieved = request.getParameter("Grade_Achieved");
-
-        try {
-            Class.forName("org.postgresql.Driver");
-            Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-
-            // Check if the record already exists
-            PreparedStatement checkStmt = connection.prepareStatement(
-                "SELECT COUNT(*) FROM Enrolled_In WHERE SSN = ? AND Year = ? AND Title = ? AND Quarter = ?");
-            checkStmt.setString(1, SSN);
-            checkStmt.setInt(2, Year);
-            checkStmt.setString(3, Title);
-            checkStmt.setString(4, Quarter);
-            ResultSet checkResult = checkStmt.executeQuery();
-            checkResult.next();
-            int count = checkResult.getInt(1);
-            checkStmt.close();
-
-            if (count == 0) { // If record doesn't exist, then insert
-                PreparedStatement pstmt = connection.prepareStatement(
-                    "INSERT INTO Enrolled_In (SSN, Year, Title, Quarter, Taken, Grade_Achieved) VALUES (?, ?, ?, ?, ?, ?)");
-                pstmt.setString(1, SSN);
-                pstmt.setInt(2, Year);
-                pstmt.setString(3, Title);
-                pstmt.setString(4, Quarter);
-                pstmt.setBoolean(5, Taken);
-                pstmt.setString(6, Grade_Achieved);
-                pstmt.executeUpdate();
-                pstmt.close();
-                out.println("Record inserted successfully!");
-            } else {
-                out.println("Record already exists!");
-            }
-
-            connection.close();
-        } catch (SQLException sqle) {
-            out.println("SQL Exception: " + sqle.getMessage());
-            sqle.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            out.println("Class Not Found Exception: " + cnfe.getMessage());
-            cnfe.printStackTrace();
-        }
-    }
-%>

@@ -1,8 +1,7 @@
-<%@ page language="java" import="java.sql.*" %>
+<%@ page language="java" import="java.sql.*" contentType="application/json; charset=UTF-8" %>
 <%
     String courseNumber = request.getParameter("courseNumber");
     String title = request.getParameter("title");
-    String sectionId = request.getParameter("sectionId");
     String jdbcUrl = "jdbc:postgresql://localhost:5432/cse132";
     String username = "dylanolivares";
     String password = "dylanolivares";
@@ -10,20 +9,20 @@
     try {
         Class.forName("org.postgresql.Driver");
         Connection connection = DriverManager.getConnection(jdbcUrl, username, password);
-        PreparedStatement pstmt = connection.prepareStatement("SELECT DISTINCT Quarter FROM Consists_of_Sections WHERE Course_number = ? AND Title = ? AND Section_ID = ?");
+        PreparedStatement pstmt = connection.prepareStatement("SELECT Quarter, Year FROM Class WHERE Course_number = ? AND Title = ?");
         pstmt.setInt(1, Integer.parseInt(courseNumber));
         pstmt.setString(2, title);
-        pstmt.setInt(3, Integer.parseInt(sectionId));
         ResultSet rs = pstmt.executeQuery();
-
-        if (rs.next()) {
-            out.print(rs.getString("Quarter"));
-        }
         
+        if (rs.next()) {
+            String quarter = rs.getString("Quarter");
+            int year = rs.getInt("Year");
+            out.print("{\"quarter\":\"" + quarter + "\", \"year\":" + year + "}");
+        }
         rs.close();
         pstmt.close();
         connection.close();
     } catch (Exception e) {
-        out.println("Exception: " + e.getMessage());
+        out.println("{\"error\":\"" + e.getMessage() + "\"}");
     }
 %>
