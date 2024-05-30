@@ -8,9 +8,11 @@
                 if (this.readyState == 4 && this.status == 200) {
                     document.getElementById("class").innerHTML = this.responseText;
                     populateSections(); // Automatically populate sections when classes change
+                    populateQuarter();
+                    populateYear();
                 }
             };
-            xhr.open("GET", "get_classes.jsp?courseNumber=" + courseNumber, true);
+            xhr.open("GET", "enrolled_helpers/get_classes.jsp?courseNumber=" + courseNumber, true);
             xhr.send();
         }
 
@@ -23,7 +25,33 @@
                     document.getElementById("section").innerHTML = this.responseText;
                 }
             };
-            xhr.open("GET", "get_sections.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.open("GET", "enrolled_helpers/get_sections.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.send();
+        }
+
+        function populateQuarter() {
+            var courseNumber = document.getElementById("course").value;
+            var title = document.getElementById("class").value;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("quarter").value = this.responseText;
+                }
+            };
+            xhr.open("GET", "enrolled_helpers/get_quarter.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
+            xhr.send();
+        }
+
+        function populateYear() {
+            var courseNumber = document.getElementById("course").value;
+            var title = document.getElementById("class").value;
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("year").value = this.responseText;
+                }
+            };
+            xhr.open("GET", "enrolled_helpers/get_year.jsp?courseNumber=" + courseNumber + "&title=" + title, true);
             xhr.send();
         }
     </script>
@@ -60,11 +88,13 @@
                         if (action != null && action.equals("insert")) {
                             // Check if the record already exists
                             PreparedStatement checkStmt = connection.prepareStatement(
-                                "SELECT COUNT(*) FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ?");
+                                "SELECT COUNT(*) FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
                             checkStmt.setString(1, request.getParameter("SSN"));
                             checkStmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
                             checkStmt.setString(3, request.getParameter("Title"));
                             checkStmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                            checkStmt.setString(5, request.getParameter("Quarter"));
+                            checkStmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
                             ResultSet checkResult = checkStmt.executeQuery();
                             checkResult.next();
                             int count = checkResult.getInt(1);
@@ -72,14 +102,16 @@
                             
                             if (count == 0) { // If record doesn't exist, then insert
                                 PreparedStatement pstmt = connection.prepareStatement(
-                                    "INSERT INTO Enrolled_In (SSN, Course_number, Title, Section_id, Taken, Grade_Achieved) VALUES (?, ?, ?, ?, ?, ?)");
+                                    "INSERT INTO Enrolled_In (SSN, Course_number, Title, Section_id, Quarter, Year, Taken, Grade_Achieved) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
                                 pstmt.setString(1, request.getParameter("SSN"));
                                 pstmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
                                 pstmt.setString(3, request.getParameter("Title"));
                                 pstmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                                pstmt.setString(5, request.getParameter("Quarter"));
+                                pstmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
                                 boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
-                                pstmt.setBoolean(5, taken);
-                                pstmt.setString(6, request.getParameter("Grade_Achieved"));
+                                pstmt.setBoolean(7, taken);
+                                pstmt.setString(8, request.getParameter("Grade_Achieved"));
                                 pstmt.executeUpdate();
                                 pstmt.close();
                             } else {
@@ -91,7 +123,7 @@
                         // Check if an update is requested
                         if (action != null && action.equals("update")) {
                             PreparedStatement pstmt = connection.prepareStatement(
-                                "UPDATE Enrolled_In SET Taken = ?, Grade_Achieved = ? WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ?");
+                                "UPDATE Enrolled_In SET Taken = ?, Grade_Achieved = ? WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
                             boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
                             pstmt.setBoolean(1, taken);
                             pstmt.setString(2, request.getParameter("Grade_Achieved"));
@@ -99,6 +131,8 @@
                             pstmt.setInt(4, Integer.parseInt(request.getParameter("Course_number")));
                             pstmt.setString(5, request.getParameter("Title"));
                             pstmt.setInt(6, Integer.parseInt(request.getParameter("Section_id")));
+                            pstmt.setString(7, request.getParameter("Quarter"));
+                            pstmt.setInt(8, Integer.parseInt(request.getParameter("Year")));
                             pstmt.executeUpdate();
                             pstmt.close();
                         }
@@ -107,11 +141,13 @@
                         // Check if a delete is requested
                         if (action != null && action.equals("delete")) {
                             PreparedStatement pstmt1 = connection.prepareStatement(
-                                "DELETE FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ?");
+                                "DELETE FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
                             pstmt1.setString(1, request.getParameter("SSN"));
                             pstmt1.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
                             pstmt1.setString(3, request.getParameter("Title"));
                             pstmt1.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                            pstmt1.setString(5, request.getParameter("Quarter"));
+                            pstmt1.setInt(6, Integer.parseInt(request.getParameter("Year")));
                             pstmt1.executeUpdate();
                             pstmt1.close();
                         }
@@ -127,6 +163,8 @@
                         <th>Course</th>
                         <th>Class</th>
                         <th>Section</th>
+                        <th>Quarter</th>
+                        <th>Year</th>
                         <th>Taken</th>
                         <th>Grade Achieved</th>
                     </tr>
@@ -150,6 +188,8 @@
                             </select>
                             </th>
                             <th><select id="section" name="Section_id"></select></th>
+                            <th><input id="quarter" name="Quarter" size="15"></th>
+                            <th><input id="year" name="Year" size="15"></th>
                             <th><input type="checkbox" name="Taken"></th>
                             <th><input value="" name="Grade_Achieved" size="15"></th>
                             <th><input type="submit" value="Insert"></th>
@@ -166,6 +206,8 @@
                             <th><input value="<%= rs.getString("Course_number") %>" name="Course_number"></th>
                             <th><input value="<%= rs.getString("Title") %>" name="Title"></th>
                             <th><input value="<%= rs.getInt("Section_id") %>" name="Section_id"></th>
+                            <th><input value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                            <th><input value="<%= rs.getInt("Year") %>" name="Year"></th>
                             <th><input type="checkbox" name="Taken" <%= rs.getBoolean("Taken") ? "checked" : "" %>></th>
                             <th><input value="<%= rs.getString("Grade_Achieved") %>" name="Grade_Achieved"></th>
                             <th><input type="submit" value="Update"></th>
@@ -176,6 +218,8 @@
                             <th><input type="hidden" value="<%= rs.getString("Course_number") %>" name="Course_number"></th>
                             <th><input type="hidden" value="<%= rs.getString("Title") %>" name="Title"></th>
                             <th><input type="hidden" value="<%= rs.getInt("Section_id") %>" name="Section_id"></th>
+                            <th><input type="hidden" value="<%= rs.getString("Quarter") %>" name="Quarter"></th>
+                            <th><input type="hidden" value="<%= rs.getInt("Year") %>" name="Year"></th>
                             <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>

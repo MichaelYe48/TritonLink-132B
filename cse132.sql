@@ -192,12 +192,15 @@ CREATE TABLE Enrolled_In (
     Course_Number INT,
     Title VARCHAR(100),
     Section_id INT,
+    Quarter VARCHAR(50),
+    Year INT,
     Taken BOOLEAN,
     Grade_Achieved VARCHAR(10),
-    PRIMARY KEY (SSN, Course_Number, Title, Section_id),
+    PRIMARY KEY (SSN, Course_Number, Title, Section_id, Quarter),
     FOREIGN KEY (SSN) REFERENCES Student(SSN),
     FOREIGN KEY (Course_number) REFERENCES Course(Course_number),
-    FOREIGN KEY (Section_id) REFERENCES Section(Section_id)
+    FOREIGN KEY (Section_id) REFERENCES Section(Section_id),
+    FOREIGN KEY (Course_number, Title, Quarter, Year) REFERENCES Class(Course_number, Title, Quarter, Year)
 );
 
 
