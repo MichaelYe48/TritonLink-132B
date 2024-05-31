@@ -18,6 +18,7 @@
 
                     Connection connection = null;
                     Statement statement = null;
+                    Statement degreeStatement = null;
                     ResultSet rsStudents = null;
                     ResultSet rsDegrees = null;
 
@@ -30,9 +31,10 @@
 
                         // Create the statement
                         statement = connection.createStatement();
+                        degreeStatement = connection.createStatement();
 
                         // Query to get the list of undergraduate students enrolled in the current quarter
-                        String studentQuery = "SELECT DISTINCT s.SSN, s.First_name, s.Middle_name, s.Last_name " +
+                        String studentQuery = "SELECT DISTINCT s.SSN AS SSN, s.First_name AS FIRSTNAME, s.Middle_name AS MIDDLENAME, s.Last_name AS LASTNAME " +
                                               "FROM Student s " +
                                               "JOIN Enrolled_In e ON s.SSN = e.SSN " +
                                               "JOIN Undergraduate_student u ON s.SSN = u.SSN " +
@@ -43,9 +45,9 @@
                         String degreeQuery = "SELECT Degree_name, Degree_Type " +
                                              "FROM Degree " +
                                              "WHERE Degree_Type = 'BSC'";
-                        rsDegrees = statement.executeQuery(degreeQuery);
+                        rsDegrees = degreeStatement.executeQuery(degreeQuery);
                 %>
-                <form action="degreeRequirements.jsp" method="get">
+                <form action="degreerequirements.jsp" method="get">
                     <table>
                         <tr>
                             <th>Select Undergraduate Student</th>
@@ -54,9 +56,9 @@
                                     <%
                                         while (rsStudents.next()) {
                                             String ssn = rsStudents.getString("SSN");
-                                            String firstName = rsStudents.getString("First_name");
-                                            String middleName = rsStudents.getString("Middle_name");
-                                            String lastName = rsStudents.getString("Last_name");
+                                            String firstName = rsStudents.getString("FIRSTNAME");
+                                            String middleName = rsStudents.getString("MIDDLENAME");
+                                            String lastName = rsStudents.getString("LASTNAME");
                                     %>
                                     <option value="<%= ssn %>"><%= ssn %> <%= firstName %> <%= middleName %> <%= lastName %></option>
                                     <%
@@ -93,6 +95,7 @@
                     if (rsStudents != null) rsStudents.close();
                     if (rsDegrees != null) rsDegrees.close();
                     if (statement != null) statement.close();
+                    if (degreeStatement!= null) degreeStatement.close();
                     if (connection != null) connection.close();
                 } catch (SQLException sqle) {
                     out.println("SQL Exception: " + sqle.getMessage());

@@ -35,8 +35,9 @@
         String studentUnitsQuery = "SELECT SUM(co.Units) AS TotalUnits, c.Category_name " +
                                    "FROM Enrolled_In e " +
                                    "JOIN Class cl ON e.Course_Number = cl.Course_number AND e.Title = cl.Title AND e.Quarter = cl.Quarter AND e.Year = cl.Year " +
-                                   "JOIN Course_In_Category cc ON cc.Course_Number = cl.Course_Number " + 
-                                   "JOIN Composed_Of c ON con.Course_Number = c.Course_Number " +
+                                   "JOIN Courses_In_Category cc ON cc.Course_Number = cl.Course_Number " + 
+                                   "JOIN Composed_Of c ON cc.Category_name = c.Category_name " +
+                                   "JOIN Course co ON co.Course_Number = cc.Course_Number " +
                                    "WHERE e.SSN = ? " +
                                    "GROUP BY c.Category_name";
         PreparedStatement pstmtStudentUnits = connection.prepareStatement(studentUnitsQuery);
@@ -58,26 +59,28 @@
 %>
 <table border="1">
     <tr>
-        <th>Category</th>
-        <th>Required Units</th>
-        <th>Units Taken</th>
-        <th>Remaining Units</th>
+        <tr>
+            <th>Category</th>
+            <th>Required Units</th>
+            <th>Units Taken</th>
+            <th>Remaining Units</th>
+        </tr>
+        <%
+            for (String category : degreeRequirements.keySet()) {
+                int requiredUnits = degreeRequirements.get(category);
+                int unitsTaken = studentUnits.getOrDefault(category, 0);
+                int remainingUnits = requiredUnits - unitsTaken > 0 ? requiredUnits - unitsTaken : 0;
+        %>
+        <tr>
+            <td><%= category %></td>
+            <td><%= requiredUnits %></td>
+            <td><%= unitsTaken %></td>
+            <td><%= remainingUnits %></td>
+        </tr>
+        <%
+            }
+        %>
     </tr>
-    <%
-        for (String category : degreeRequirements.keySet()) {
-            int requiredUnits = degreeRequirements.get(category);
-            int unitsTaken = studentUnits.getOrDefault(category, 0);
-            int remainingUnits = requiredUnits - unitsTaken;
-    %>
-    <tr>
-        <td><%= category %></td>
-        <td><%= requiredUnits %></td>
-        <td><%= unitsTaken %></td>
-        <td><%= remainingUnits %></td>
-    </tr>
-    <%
-        }
-    %>
 </table>
 <%
         // Close resources
