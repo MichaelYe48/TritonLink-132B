@@ -116,6 +116,7 @@ CREATE TABLE Meeting (
     Meeting_frequency VARCHAR(50),
     Start_date DATE,
     End_date DATE,
+    Day VARCHAR(50),
     Start_time TIME,
     End_time TIME,
     PRIMARY KEY (Section_id, Start_date, Start_time),

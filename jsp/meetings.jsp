@@ -24,7 +24,7 @@
 
                     if (action != null && action.equals("insert")) {
                         PreparedStatement pstmt = connection.prepareStatement(
-                            "INSERT INTO Meeting (Section_id, Meeting_type, Location, Mandatory, Meeting_frequency, Start_date, End_date, Start_time, End_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                            "INSERT INTO Meeting (Section_id, Meeting_type, Location, Mandatory, Meeting_frequency, Start_date, End_date, Start_time, End_time, Day) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                         pstmt.setInt(1, Integer.parseInt(request.getParameter("Section_id")));
                         pstmt.setString(2, request.getParameter("Meeting_type"));
                         pstmt.setString(3, request.getParameter("Location"));
@@ -34,22 +34,24 @@
                         pstmt.setDate(7, Date.valueOf(request.getParameter("End_date")));
                         pstmt.setTime(8, Time.valueOf(request.getParameter("Start_time")));
                         pstmt.setTime(9, Time.valueOf(request.getParameter("End_time")));
+                        pstmt.setString(10, request.getParameter("Day")); // Add the Day parameter
                         pstmt.executeUpdate();
                         pstmt.close();
                     }
 
                     if (action != null && action.equals("update")) {
                         PreparedStatement pstmt = connection.prepareStatement(
-                            "UPDATE Meeting SET Meeting_type = ?, Location = ?, Mandatory = ?, Meeting_frequency = ?, End_date = ?, End_time = ? WHERE Section_id = ? AND Start_date = ? AND Start_time = ?");
+                            "UPDATE Meeting SET Meeting_type = ?, Location = ?, Mandatory = ?, Meeting_frequency = ?, End_date = ?, End_time = ?, Day = ? WHERE Section_id = ? AND Start_date = ? AND Start_time = ?");
                         pstmt.setString(1, request.getParameter("Meeting_type"));
                         pstmt.setString(2, request.getParameter("Location"));
                         pstmt.setBoolean(3, request.getParameter("Mandatory") != null && request.getParameter("Mandatory").equals("on"));
                         pstmt.setString(4, request.getParameter("Meeting_frequency"));
                         pstmt.setDate(5, Date.valueOf(request.getParameter("End_date")));
                         pstmt.setTime(6, Time.valueOf(request.getParameter("End_time")));
-                        pstmt.setInt(7, Integer.parseInt(request.getParameter("Section_id")));
-                        pstmt.setDate(8, Date.valueOf(request.getParameter("Start_date")));
-                        pstmt.setTime(9, Time.valueOf(request.getParameter("Start_time")));
+                        pstmt.setString(7, request.getParameter("Day")); // Add the Day parameter
+                        pstmt.setInt(8, Integer.parseInt(request.getParameter("Section_id")));
+                        pstmt.setDate(9, Date.valueOf(request.getParameter("Start_date")));
+                        pstmt.setTime(10, Time.valueOf(request.getParameter("Start_time")));
                         pstmt.executeUpdate();
                         pstmt.close();
                     }
@@ -78,6 +80,7 @@
                         <th>End Date</th>
                         <th>Start Time</th>
                         <th>End Time</th>
+                        <th>Day</th> <!-- Add Day column header -->
                     </tr>
                     <tr>
                         <form action="meetings.jsp" method="get">
@@ -91,6 +94,7 @@
                             <th><input value="" name="End_date" size="15"></th>
                             <th><input value="" name="Start_time" size="15"></th>
                             <th><input value="" name="End_time" size="15"></th>
+                            <th><input value="" name="Day" size="10"></th> <!-- Add input field for Day -->
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -109,6 +113,7 @@
                             <th><input value="<%= rs.getDate("End_date") %>" name="End_date"></th>
                             <th><input value="<%= rs.getTime("Start_time") %>" name="Start_time"></th>
                             <th><input value="<%= rs.getTime("End_time") %>" name="End_time"></th>
+                            <th><input value="<%= rs.getString("Day") %>" name="Day"></th> <!-- Add input field for Day -->
                             <th><input type="submit" value="Update"></th>
                         </form>
                         <form action="meetings.jsp" method="get">
