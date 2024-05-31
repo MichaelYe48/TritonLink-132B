@@ -38,11 +38,12 @@
 
                         if (action != null && action.equals("Submit") && studentSSN != null) {
                             // Query to get the classes taken by the student
-                            String query = "SELECT c.Course_number, c.Title, c.Quarter, c.Year, co.Units, s.Section_id " +
+                            String query = "SELECT c.Course_number, c.Title, c.Quarter, c.Year, t.First_name, t.Middle_name, t.Last_name, co.Units, s.Section_id, s.Enroll_limit, s.Number_enrolled " +
                                            "FROM Class c " +
                                            "JOIN Enrolled_In e ON c.Course_number = e.Course_number AND c.Title = e.Title AND c.Quarter = e.Quarter AND c.Year = e.Year " +
                                            "JOIN Course co ON c.Course_number = co.Course_number " +
                                            "JOIN Section s ON e.Section_id = s.Section_id " +
+                                           "JOIN Taught_by t ON t.Section_id = s.Section_id " +
                                            "WHERE e.SSN = ? AND e.Quarter = 'Spring' AND e.Year = 2018";
                             PreparedStatement pstmt = connection.prepareStatement(query);
                             pstmt.setString(1, studentSSN);
@@ -86,10 +87,15 @@
                     <tr>
                         <th>Course Number</th>
                         <th>Title</th>
+                        <th>Instructor First Name</th>
+                        <th>Instructor Middle Name</th>
+                        <th>Instructor Last Name</th>
                         <th>Units</th>
                         <th>Section ID</th>
                         <th>Quarter</th>
                         <th>Year</th>
+                        <th>Enrollment Limit</th>
+                        <th>Number of Students Enrolled</th>
                     </tr>
                     <%
                         while (rs.next()) {
@@ -97,10 +103,15 @@
                     <tr>
                         <td><%= rs.getInt("Course_number") %></td>
                         <td><%= rs.getString("Title") %></td>
+                        <td><%= rs.getString("First_name") %></td>
+                        <td><%= rs.getString("Middle_name") %></td>
+                        <td><%= rs.getString("Last_name") %></td>
                         <td><%= rs.getInt("Units") %></td>
                         <td><%= rs.getInt("Section_id") %></td>
                         <td><%= rs.getString("Quarter") %></td>
                         <td><%= rs.getInt("Year") %></td>
+                        <td><%= rs.getInt("Enroll_limit") %></td>
+                        <td><%= rs.getInt("Number_enrolled") %></td>
                     </tr>
                     <%
                         }

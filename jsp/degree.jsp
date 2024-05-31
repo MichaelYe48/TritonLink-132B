@@ -34,13 +34,11 @@
 
                             if (count == 0) { // If record doesn't exist, then insert
                                 PreparedStatement pstmt = connection.prepareStatement(
-                                    "INSERT INTO Degree (Degree_name, Degree_Type, University, Total_units, Lower_div_units, Upper_div_units) VALUES (?, ?, ?, ?, ?, ?)");
+                                    "INSERT INTO Degree (Degree_name, Degree_Type, University, Total_units) VALUES (?, ?, ?, ?)");
                                 pstmt.setString(1, request.getParameter("Degree_name"));
                                 pstmt.setString(2, request.getParameter("Degree_Type"));
                                 pstmt.setString(3, request.getParameter("University"));
                                 pstmt.setInt(4, Integer.parseInt(request.getParameter("Total_units")));
-                                pstmt.setInt(5, Integer.parseInt(request.getParameter("Lower_div_units")));
-                                pstmt.setInt(6, Integer.parseInt(request.getParameter("Upper_div_units")));
                                 pstmt.executeUpdate();
                                 pstmt.close();
                             } else {
@@ -51,12 +49,10 @@
                         // Update
                         if (action != null && action.equals("update")) {
                             PreparedStatement pstatement = connection.prepareStatement(
-                                "UPDATE Degree SET Degree_Type = ?, University = ?, Total_units = ?, Lower_div_units = ?, Upper_div_units = ? WHERE Degree_name = ?");
+                                "UPDATE Degree SET Degree_Type = ?, University = ?, Total_units = ? WHERE Degree_name = ?");
                             pstatement.setString(1, request.getParameter("Degree_Type"));
                             pstatement.setString(2, request.getParameter("University"));
                             pstatement.setInt(3, Integer.parseInt(request.getParameter("Total_units")));
-                            pstatement.setInt(4, Integer.parseInt(request.getParameter("Lower_div_units")));
-                            pstatement.setInt(5, Integer.parseInt(request.getParameter("Upper_div_units")));
                             pstatement.setString(6, request.getParameter("Degree_name"));
                             int rowCount = pstatement.executeUpdate();
                             pstatement.close();
@@ -81,8 +77,6 @@
                             <th>Degree Type</th>
                             <th>University</th>
                             <th>Total Units</th>
-                            <th>Lower Div Units</th>
-                            <th>Upper Div Units</th>
                         </tr>
                         <tr>
                             <form action="degree.jsp" method="get">
@@ -91,8 +85,6 @@
                                 <th><input value="" name="Degree_Type" size="15"></th>
                                 <th><input value="" name="University" size="15"></th>
                                 <th><input value="" name="Total_units" size="15"></th>
-                                <th><input value="" name="Lower_div_units" size="15"></th>
-                                <th><input value="" name="Upper_div_units" size="15"></th>
                                 <th><input type="submit" value="Insert"></th>
                             </form>
                         </tr>
@@ -106,8 +98,6 @@
                                 <th><input value="<%= rs.getString("Degree_Type") %>" name="Degree_Type"></th>
                                 <th><input value="<%= rs.getString("University") %>" name="University"></th>
                                 <th><input value="<%= rs.getInt("Total_units") %>" name="Total_units"></th>
-                                <th><input value="<%= rs.getInt("Lower_div_units") %>" name="Lower_div_units"></th>
-                                <th><input value="<%= rs.getInt("Upper_div_units") %>" name="Upper_div_units"></th>
                                 <th><input type="submit" value="Update"></th>
                             </form>
                             <form action="degree.jsp" method="get">

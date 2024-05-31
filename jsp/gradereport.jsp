@@ -61,7 +61,7 @@
                                            "FROM Enrolled_In e " +
                                            "JOIN Class cl ON e.Course_number = cl.Course_number AND e.Title = cl.Title AND e.Quarter = cl.Quarter AND e.Year = cl.Year " +
                                            "JOIN Course c ON cl.Course_number = c.Course_number " +
-                                           "WHERE e.SSN = ? " +
+                                           "WHERE e.SSN = ? AND e.Taken = TRUE AND e.Grade_Achieved NOT IN ('S/U', 'IN') " +
                                            "ORDER BY cl.Year, cl.Quarter";
                             PreparedStatement pstmt = connection.prepareStatement(query);
                             pstmt.setString(1, studentSSN);
