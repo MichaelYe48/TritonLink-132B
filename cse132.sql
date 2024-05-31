@@ -217,7 +217,9 @@ CREATE TABLE Concentration (
     University VARCHAR(100),
     Course_Number INT,
     Concentration_Name VARCHAR(100),
-    PRIMARY KEY (Degree_Type, University, Course_Number),
+    Minimum_GPA INT,
+    Units INT,
+    PRIMARY KEY (Degree_Type, University, Course_Number, Concentration_Name),
     FOREIGN KEY (Degree_name, Degree_Type, University) REFERENCES Degree(Degree_name, Degree_Type, University),
     FOREIGN KEY (Course_Number) REFERENCES Course(Course_number)
 );
