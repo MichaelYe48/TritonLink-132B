@@ -43,12 +43,14 @@
                             
                             if (count == 0) { // If record doesn't exist, then insert
                                 PreparedStatement pstmt = connection.prepareStatement(
-                                    "INSERT INTO Concentration (Degree_Type, Degree_Name, University, Course_Number, Concentration_Name) VALUES (?, ?, ?, ?, ?)");
+                                    "INSERT INTO Concentration (Degree_Type, Degree_Name, University, Course_Number, Concentration_Name, Minimum_GPA, Units) VALUES (?, ?, ?, ?, ?, ?, ?)");
                                 pstmt.setString(1, request.getParameter("Degree_Type"));
                                 pstmt.setString(2, request.getParameter("Degree_Name"));
                                 pstmt.setString(3, request.getParameter("University"));
                                 pstmt.setInt(4, Integer.parseInt(request.getParameter("Course_Number")));
                                 pstmt.setString(5, request.getParameter("Concentration_Name"));
+                                pstmt.setInt(6, Integer.parseInt(request.getParameter("Minimum_GPA")));
+                                pstmt.setInt(7, Integer.parseInt(request.getParameter("Units")));
                                 pstmt.executeUpdate();
                                 pstmt.close();
                             } else {
@@ -60,17 +62,18 @@
                         // Check if an update is requested
                         if (action != null && action.equals("update")) {
                             PreparedStatement pstmt = connection.prepareStatement(
-                                "UPDATE Concentration SET Degree_Type = ?, Degree_Name = ?, University = ?, Course_Number = ?, Concentration_Name = ? WHERE Degree_Type = ? AND Degree_Name = ? AND University = ? AND Course_Number = ? AND Concentration_Name = ?");
-                            pstmt.setString(1, request.getParameter("New_Degree_Type"));
-                            pstmt.setString(2, request.getParameter("New_Degree_Name"));
-                            pstmt.setString(3, request.getParameter("New_University"));
-                            pstmt.setInt(4, Integer.parseInt(request.getParameter("New_Course_Number")));
-                            pstmt.setString(5, request.getParameter("New_Concentration_Name"));
-                            pstmt.setString(6, request.getParameter("Degree_Type"));
-                            pstmt.setString(7, request.getParameter("Degree_Name"));
-                            pstmt.setString(8, request.getParameter("University"));
-                            pstmt.setInt(9, Integer.parseInt(request.getParameter("Course_Number")));
-                            pstmt.setString(10, request.getParameter("Concentration_Name"));
+                                "UPDATE Concentration SET Degree_Type = ?, Degree_Name = ?, University = ?, Course_Number = ?, Concentration_Name = ?, Minimum_GPA = ?, Units = ? WHERE Degree_Type = ? AND University = ? AND Course_Number = ? AND Concentration_Name = ?");
+                            pstmt.setString(1, request.getParameter("Degree_Type"));
+                            pstmt.setString(2, request.getParameter("Degree_Name"));
+                            pstmt.setString(3, request.getParameter("University"));
+                            pstmt.setInt(4, Integer.parseInt(request.getParameter("Course_Number")));
+                            pstmt.setString(5, request.getParameter("Concentration_Name"));
+                            pstmt.setInt(6, Integer.parseInt(request.getParameter("Minimum_GPA")));
+                            pstmt.setInt(7, Integer.parseInt(request.getParameter("Units")));
+                            pstmt.setString(8, request.getParameter("Degree_Type"));
+                            pstmt.setString(9, request.getParameter("University"));
+                            pstmt.setInt(10, Integer.parseInt(request.getParameter("Course_Number")));
+                            pstmt.setString(11, request.getParameter("Concentration_Name"));
                             pstmt.executeUpdate();
                             pstmt.close();
                         }
@@ -100,6 +103,8 @@
                         <th>University</th>
                         <th>Course Number</th>
                         <th>Concentration Name</th>
+                        <th>Minimum GPA</th>
+                        <th>Units </th>
                     </tr>
                     <tr>
                         <form action="concentration.jsp" method="get">
@@ -109,6 +114,8 @@
                             <th><input value="" name="University" size="15"></th>
                             <th><input value="" name="Course_Number" size="15"></th>
                             <th><input value="" name="Concentration_Name" size="15"></th>
+                            <th><input value="" name="Minimum_GPA" size="15"></th>
+                            <th><input value="" name="Units" size="15"></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
@@ -124,11 +131,8 @@
                             <th><input value="<%= rs.getString("University") %>" name="University"></th>
                             <th><input value="<%= rs.getInt("Course_Number") %>" name="Course_Number"></th>
                             <th><input value="<%= rs.getString("Concentration_Name") %>" name="Concentration_Name"></th>
-                            <th><input type="text" name="New_Degree_Type"></th>
-                            <th><input type="text" name="New_Degree_Name"></th>
-                            <th><input type="text" name="New_University"></th>
-                            <th><input type="text" name="New_Course_Number"></th>
-                            <th><input type="text" name="New_Concentration_Name"></th>
+                            <th><input value="<%= rs.getInt("Minimum_GPA") %>" name="Minimum_GPA"></th>
+                            <th><input value="<%= rs.getInt("Units") %>" name="Units"></th>
                             <th><input type="submit" value="Update"></th>
                         </form>
                         <form action="concentration.jsp" method="get">

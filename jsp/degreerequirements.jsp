@@ -66,6 +66,7 @@
             <th>Remaining Units</th>
         </tr>
         <%
+            int totalRemaining = 0;
             for (String category : degreeRequirements.keySet()) {
                 int requiredUnits = degreeRequirements.get(category);
                 int unitsTaken = studentUnits.getOrDefault(category, 0);
@@ -78,8 +79,10 @@
             <td><%= remainingUnits %></td>
         </tr>
         <%
+            totalRemaining += remainingUnits;
             }
         %>
+        <tr>total remaining units: <%= totalRemaining %></tr>
     </tr>
 </table>
 <%

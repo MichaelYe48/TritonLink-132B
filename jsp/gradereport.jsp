@@ -61,7 +61,7 @@
                                            "FROM Enrolled_In e " +
                                            "JOIN Class cl ON e.Course_number = cl.Course_number AND e.Title = cl.Title AND e.Quarter = cl.Quarter AND e.Year = cl.Year " +
                                            "JOIN Course c ON cl.Course_number = c.Course_number " +
-                                           "WHERE e.SSN = ? AND e.Taken = TRUE AND e.Grade_Achieved NOT IN ('S/U', 'IN') " +
+                                           "WHERE e.SSN = ? AND e.Taken = TRUE " +
                                            "ORDER BY cl.Year, cl.Quarter";
                             PreparedStatement pstmt = connection.prepareStatement(query);
                             pstmt.setString(1, studentSSN);
@@ -116,7 +116,7 @@
                             classesByQuarter.get(quarterYear).add(classDetails);
 
                             // Calculate GPA for the quarter
-                            if (!rsClasses.getString("Grade_Achieved").equals("IN")) {
+                            if (!rsClasses.getString("Grade_Achieved").equals("IN") && !rsClasses.getString("Grade_Achieved").equals("S") && !rsClasses.getString("Grade_Achieved").equals("U")) {
                                 double gradePoints = gradeToGPA.get(rsClasses.getString("Grade_Achieved")) * rsClasses.getInt("Units");
                                 if (!gpaByQuarter.containsKey(quarterYear)) {
                                     gpaByQuarter.put(quarterYear, gradePoints);
@@ -131,9 +131,12 @@
                         // Calculate GPA
                         for (String quarterYear : gpaByQuarter.keySet()) {
                             int unitsInQuarter = classesByQuarter.get(quarterYear).stream()
-                                    .filter(c -> !c.get("Grade_Achieved").equals("IN"))
-                                    .mapToInt(c -> (int) c.get("Units"))
-                                    .sum();
+                            .filter(c -> {
+                                String grade = (String) c.get("Grade_Achieved");
+                                return !grade.equals("IN") && !grade.equals("S") && !grade.equals("U");
+                            })
+                            .mapToInt(c -> (int) c.get("Units"))
+                            .sum();
                             gpaByQuarter.put(quarterYear, gpaByQuarter.get(quarterYear) / unitsInQuarter);
                         }
                         double cumulativeGPA = totalUnits > 0 ? totalGpaSum / totalUnits : 0;

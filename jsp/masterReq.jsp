@@ -33,24 +33,22 @@
                         statement = connection.createStatement();
                         degreeStatement = connection.createStatement();
 
-                        // Query to get the list of undergraduate students enrolled in the current quarter
                         String studentQuery = "SELECT DISTINCT s.SSN AS SSN, s.First_name AS FIRSTNAME, s.Middle_name AS MIDDLENAME, s.Last_name AS LASTNAME " +
                                               "FROM Student s " +
                                               "JOIN Enrolled_In e ON s.SSN = e.SSN " +
-                                              "JOIN Undergraduate_student u ON s.SSN = u.SSN " +
+                                              "JOIN Graduate_student u ON s.SSN = u.SSN " +
                                               "WHERE e.Quarter = 'Spring' AND e.Year = 2018";
                         rsStudents = statement.executeQuery(studentQuery);
 
-                        // Query to get the list of BSC degrees
                         String degreeQuery = "SELECT Degree_name, Degree_Type " +
                                              "FROM Degree " +
-                                             "WHERE Degree_Type = 'BSC'";
+                                             "WHERE Degree_Type = 'MS'";
                         rsDegrees = degreeStatement.executeQuery(degreeQuery);
                 %>
-                <form action="degreerequirements.jsp" method="get">
+                <form action="graddegreerequirements.jsp" method="get">
                     <table>
                         <tr>
-                            <th>Select Undergraduate Student</th>
+                            <th>Select Graduate Student</th>
                             <td>
                                 <select name="StudentSSN">
                                     <%
