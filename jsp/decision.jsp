@@ -19,6 +19,8 @@
                     <input type="text" id="professor" name="professor">
                     <label for="quarter">Quarter:</label>
                     <input type="text" id="quarter" name="quarter">
+                    <label for="year">Year:</label>
+                    <input type="text" id="year" name="year">
                     <input type="submit" value="Generate Report">
                 </form>
 
@@ -67,6 +69,7 @@
                             String courseID = request.getParameter("courseID");
                             String professor = request.getParameter("professor");
                             String quarter = request.getParameter("quarter");
+                            String year = request.getParameter("year");
 
                             // Query to get grade distribution for a professor in a quarter and course
                             if (courseID != null && !courseID.isEmpty() && professor != null && !professor.isEmpty() && quarter != null && !quarter.isEmpty()) {
@@ -77,12 +80,13 @@
                                                "       COUNT(CASE WHEN Grade_Achieved NOT IN ('A', 'B', 'C', 'D') THEN 1 END) AS other_count " +
                                                "FROM Enrolled_In e " +
                                                "JOIN Class c ON e.Course_Number = c.Course_number AND e.Title = c.Title AND e.Quarter = c.Quarter AND e.Year = c.Year " +
-                                               "WHERE e.Course_Number = ? AND c.Quarter = ? AND e.Grade_Achieved IS NOT NULL " +
+                                               "WHERE e.Course_Number = ? AND c.Quarter = ? AND c.Year = ? AND e.Grade_Achieved IS NOT NULL " +
                                                "  AND EXISTS (SELECT 1 FROM Taught_By t WHERE t.Section_ID = e.Section_id " +
                                                "              AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ?)";
                                 pstmt = connection.prepareStatement(query);
                                 pstmt.setInt(1, Integer.parseInt(courseID));
                                 pstmt.setString(2, quarter);
+                                pstmt.setInt(3, Integer.parseInt(year));
 
                                 // Split professor name into first, middle, and last name
                                 String[] names = professor.split("\\s+", 3);
@@ -90,9 +94,9 @@
                                 String middleName = names.length > 1 ? names[1] : "";
                                 String lastName = names.length > 2 ? names[2] : "";
 
-                                pstmt.setString(3, firstName);
-                                pstmt.setString(4, middleName);
-                                pstmt.setString(5, lastName);
+                                pstmt.setString(4, firstName);
+                                pstmt.setString(5, middleName);
+                                pstmt.setString(6, lastName);
 
                                 rs = pstmt.executeQuery();
                                 if (rs.next()) {
@@ -255,7 +259,7 @@
                                                 "            ELSE 0.0 END) AS GPA " +
                                                 "FROM Enrolled_In e " +
                                                 "JOIN Taught_By t ON e.Section_id = t.Section_ID " +
-                                                "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ?";
+                                                "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ? AND e.Grade_Achieved NOT IN ('I', 'S', 'U')";
                                 pstmt = connection.prepareStatement(query4);
                                 pstmt.setInt(1, Integer.parseInt(courseID4));
 
