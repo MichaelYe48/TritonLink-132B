@@ -145,7 +145,6 @@
                                                 "       COUNT(CASE WHEN Grade_Achieved = 'D' THEN 1 END) AS D_count, " +
                                                 "       COUNT(CASE WHEN Grade_Achieved NOT IN ('A', 'B', 'C', 'D') THEN 1 END) AS other_count " +
                                                 "FROM Enrolled_In e " +
-                                                "JOIN Class c ON e.Course_Number = c.Course_number AND e.Title = c.Title " +
                                                 "JOIN Taught_By t ON e.Section_id = t.Section_ID " +
                                                 "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ?";
                                 pstmt = connection.prepareStatement(query2);
