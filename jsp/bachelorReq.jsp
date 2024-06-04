@@ -38,7 +38,7 @@
                                               "FROM Student s " +
                                               "JOIN Enrolled_In e ON s.SSN = e.SSN " +
                                               "JOIN Undergraduate_student u ON s.SSN = u.SSN " +
-                                              "WHERE e.Quarter = 'Spring' AND e.Year = 2018";
+                                              "WHERE e.Quarter = 'SPRING' AND e.Year = 2018";
                         rsStudents = statement.executeQuery(studentQuery);
 
                         // Query to get the list of BSC degrees

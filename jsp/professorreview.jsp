@@ -35,7 +35,7 @@
                                                       "JOIN Class c ON cos.Course_number = c.Course_number AND cos.Title = c.Title AND cos.Quarter = c.Quarter AND cos.Year = c.Year " +
                                                       "WHERE c.Quarter = ? AND c.Year = ?";
                                 pstmtSections = connection.prepareStatement(sectionsQuery);
-                                pstmtSections.setString(1, "Spring");
+                                pstmtSections.setString(1, "SPRING");
                                 pstmtSections.setInt(2, 2018);
                                 rsSections = pstmtSections.executeQuery();
 
@@ -95,7 +95,7 @@
                                                            "WHERE e.Quarter = ? AND e.Year = ? " +
                                                            "AND m.Start_date <= ? AND m.End_date >= ?";
                             pstmtConflicts = connection.prepareStatement(studentSchedulesQuery);
-                            pstmtConflicts.setString(1, "Spring");
+                            pstmtConflicts.setString(1, "SPRING");
                             pstmtConflicts.setInt(2, 2018);
                             pstmtConflicts.setDate(3, java.sql.Date.valueOf(startDate));
                             pstmtConflicts.setDate(4, java.sql.Date.valueOf(endDate));

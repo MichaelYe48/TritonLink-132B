@@ -44,7 +44,7 @@
                                            "JOIN Course co ON c.Course_number = co.Course_number " +
                                            "JOIN Section s ON e.Section_id = s.Section_id " +
                                            "JOIN Taught_by t ON t.Section_id = s.Section_id " +
-                                           "WHERE e.SSN = ? AND e.Quarter = 'Spring' AND e.Year = 2018";
+                                           "WHERE e.SSN = ? AND e.Quarter = 'SPRING' AND e.Year = 2018";
                             PreparedStatement pstmt = connection.prepareStatement(query);
                             pstmt.setString(1, studentSSN);
                             rs = pstmt.executeQuery();
@@ -54,7 +54,7 @@
                         String studentQuery = "SELECT DISTINCT s.SSN AS SSN, s.First_name AS FIRSTNAME, s.Middle_Name AS MIDDLENAME, s.Last_Name AS LASTNAME " +
                                               "FROM Student s " +
                                               "JOIN Enrolled_In e ON s.SSN = e.SSN " +
-                                              "WHERE e.Quarter = 'Spring' AND e.Year = 2018";
+                                              "WHERE e.Quarter = 'SPRING' AND e.Year = 2018";
                         rs2 = statement2.executeQuery(studentQuery);
                 %>
                 <table>
