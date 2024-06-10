@@ -128,7 +128,7 @@
                             <th><input type="hidden" value="<%= rs.getString("Degree_Name") %>" name="Degree_Name"></th>
                             <th><input type="hidden" value="<%= rs.getString("University") %>" name="University"></th>
                             <th><input type="hidden" value="<%= rs.getString("Department_Name") %>" name="Department_Name"></th>
-                            <th><input type="hidden" type="submit" value="Delete"></th>
+                            <th><input type="submit" value="Delete"></th>
                         </form>
                     </tr>
                     <%

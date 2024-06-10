@@ -38,10 +38,11 @@
                                    "JOIN Courses_In_Category cc ON cc.Course_Number = cl.Course_Number " + 
                                    "JOIN Composed_Of c ON cc.Category_name = c.Category_name " +
                                    "JOIN Course co ON co.Course_Number = cc.Course_Number " +
-                                   "WHERE e.SSN = ? " +
+                                   "WHERE e.SSN = ? AND e.Taken = True AND c.Degree_Name = ? " +
                                    "GROUP BY c.Category_name";
         PreparedStatement pstmtStudentUnits = connection.prepareStatement(studentUnitsQuery);
         pstmtStudentUnits.setString(1, studentSSN);
+        pstmtStudentUnits.setString(2, degreeName);
         rsStudentUnits = pstmtStudentUnits.executeQuery();
 
         // Calculate remaining units for each category

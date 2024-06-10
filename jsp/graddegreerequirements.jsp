@@ -54,10 +54,11 @@
                                    "JOIN Class cl ON e.Course_Number = cl.Course_number AND e.Title = cl.Title AND e.Quarter = cl.Quarter AND e.Year = cl.Year " +
                                    "JOIN Concentration co ON e.Course_Number = co.Course_Number " +
                                    "JOIN Course c ON c.Course_Number = co.Course_Number " +
-                                   "WHERE e.SSN = ? AND NOT e.Grade_Achieved = 'I' " +
+                                   "WHERE e.SSN = ? AND e.Taken = True AND co.Degree_Name = ? AND NOT e.Grade_Achieved = 'I' " +
                                    "GROUP BY co.Concentration_Name";
         PreparedStatement pstmtStudentUnits = connection.prepareStatement(studentUnitsQuery);
         pstmtStudentUnits.setString(1, studentSSN);
+        pstmtStudentUnits.setString(2, degreeName);
         rsStudentUnits = pstmtStudentUnits.executeQuery();
 
         // Query to get all courses taken for GPA calculation
@@ -66,10 +67,11 @@
                                 "JOIN Class cl ON e.Course_Number = cl.Course_number AND e.Title = cl.Title AND e.Quarter = cl.Quarter AND e.Year = cl.Year " +
                                 "JOIN Concentration co ON e.Course_Number = co.Course_Number " +
                                 "JOIN Course c ON c.Course_Number = co.Course_Number " +
-                                "WHERE e.SSN = ? AND e.Grade_Achieved NOT IN ('I', 'S', 'U')";
+                                "WHERE e.SSN = ? AND co.Degree_Name = ? AND e.Grade_Achieved NOT IN ('I', 'S', 'U')";
         // Create a scrollable ResultSet
         PreparedStatement pstmtStudentCourses = connection.prepareStatement(studentCourses, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pstmtStudentCourses.setString(1, studentSSN);
+        pstmtStudentCourses.setString(2, degreeName);
         rsStudentCourses = pstmtStudentCourses.executeQuery();
 
         // Calculate remaining units for each category
@@ -147,8 +149,9 @@
 %>
 <table border="1">
     <tr>
-        <th>Completed Concentrations</th>
-        <th>GPA Passed With</th>
+        <th>Concentrations</th>
+        <th>GPA</th>
+        <th>Units Remaining</th>
     </tr>
     <%
         int totalRemaining = 0;
@@ -164,8 +167,18 @@
                 if (remainingUnits == 0 && gpa >= min_GPA.getOrDefault(concentration, 0)) {
     %>
     <tr>
-        <td><%= concentration %></td>
-        <td><%= gpa %></td>
+        <td>Completed <%= concentration %></td>
+        <td>with GPA of <%= gpa %></td>
+        <td>0</td>
+    </tr>
+    <%
+                }
+                else {
+    %>
+    <tr>
+        <td>Uncomplete <%= concentration %></td>
+        <td>current GPA <%= gpa %></td>
+        <td><%= remainingUnits %></td>
     </tr>
     <%
                 }
