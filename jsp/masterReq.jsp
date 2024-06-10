@@ -37,7 +37,7 @@
                                               "FROM Student s " +
                                               "JOIN Enrolled_In e ON s.SSN = e.SSN " +
                                               "JOIN Graduate_student u ON s.SSN = u.SSN " +
-                                              "WHERE e.Quarter = 'SPRING' AND e.Year = 2018";
+                                              "WHERE e.Quarter = 'Spring' AND e.Year = 2018";
                         rsStudents = statement.executeQuery(studentQuery);
 
                         String degreeQuery = "SELECT Degree_name, Degree_Type " +

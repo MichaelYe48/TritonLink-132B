@@ -11,7 +11,7 @@
     String username = "dylanolivares";
     String password = "dylanolivares";
 
-    String currentQuarter = "SPRING";
+    String currentQuarter = "Spring";
     int currentYear = 2018;
 
     Connection connection = null;

@@ -1,5 +1,5 @@
 CREATE TABLE Student (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     First_name VARCHAR(50),
     Middle_name VARCHAR(50),
     Last_name VARCHAR(50),
@@ -8,7 +8,7 @@ CREATE TABLE Student (
 );
 
 CREATE TABLE Undergraduate_student (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     College VARCHAR(100),
     Major VARCHAR(100),
     Minor VARCHAR(100),
@@ -17,24 +17,24 @@ CREATE TABLE Undergraduate_student (
 );
 
 CREATE TABLE Graduate_student (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     Department VARCHAR(100),
     FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
 CREATE TABLE Masters_student (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     "5_year_MS_program" BOOLEAN,
     FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
 CREATE TABLE Phd_student (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
 CREATE TABLE Precandidacy (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
@@ -49,7 +49,7 @@ CREATE TABLE Degree (
     Degree_Type VARCHAR(50),
     University VARCHAR(100),
     Total_units INT,
-    PRIMARY KEY (Degree_name), 
+    PRIMARY KEY (Degree_name, Degree_type), 
     CONSTRAINT unique_degree_info UNIQUE (Degree_name, Degree_Type, University) 
 );
 
@@ -58,14 +58,14 @@ CREATE TABLE Department (
 );
 
 CREATE TABLE Candidates (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     Advisors VARCHAR(150),
     Thesis_commitee VARCHAR(150),
     FOREIGN KEY (SSN) REFERENCES Student(SSN)
 );
 
 CREATE TABLE Probation (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Reason VARCHAR(200),
     Start_Quarter VARCHAR(50),
     End_Quarter VARCHAR(50),
@@ -132,7 +132,7 @@ CREATE TABLE Faculty (
 );
 
 CREATE TABLE Account_information (
-    SSN VARCHAR(10) PRIMARY KEY,
+    SSN VARCHAR(12) PRIMARY KEY,
     Street VARCHAR(100),
     City VARCHAR(100),
     State VARCHAR(50),
@@ -147,7 +147,7 @@ CREATE TABLE Account_information (
 );
 
 CREATE TABLE Advises (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     First_Name VARCHAR(50),
     Middle_Name VARCHAR(50),
     Last_Name VARCHAR(50),
@@ -167,7 +167,7 @@ CREATE TABLE Advises (
 -- );
 
 CREATE TABLE Dates_Attended (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Start_Quarter VARCHAR(50),
     End_Quarter VARCHAR(50),
     Start_Year INT,
@@ -177,7 +177,7 @@ CREATE TABLE Dates_Attended (
 );
 
 CREATE TABLE Student_Account_Information (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Street VARCHAR(100),
     City VARCHAR(100),
     State VARCHAR(50),
@@ -187,7 +187,7 @@ CREATE TABLE Student_Account_Information (
 );
 
 CREATE TABLE Enrolled_In (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Course_Number INT,
     Title VARCHAR(100),
     Section_id INT,
@@ -226,7 +226,7 @@ CREATE TABLE Concentration (
 );
 
 CREATE TABLE Has_Degree (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Degree_Type VARCHAR(50),
     Degree_name VARCHAR(100),
     University VARCHAR(100),
@@ -293,7 +293,7 @@ CREATE TABLE Works_Under (
 );
 
 CREATE TABLE Studies_Under (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Department_Name VARCHAR(100),
     PRIMARY KEY (SSN, Department_Name),
     FOREIGN KEY (SSN) REFERENCES Student(SSN),
@@ -319,7 +319,7 @@ CREATE TABLE Taught_By (
 );
 
 CREATE TABLE Thesis_Committee (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Thesis_Id INT,
     First_Name VARCHAR(50),
     Middle_Name VARCHAR(50),
@@ -330,9 +330,14 @@ CREATE TABLE Thesis_Committee (
 );
 
 CREATE TABLE Is_Waitlisted (
-    SSN VARCHAR(10),
+    SSN VARCHAR(12),
     Section_ID INT,
     PRIMARY KEY (SSN, Section_ID),
     FOREIGN KEY (SSN) REFERENCES Student(SSN),
     FOREIGN KEY (Section_ID) REFERENCES Section(Section_id)
+);
+
+create table GRADE_CONVERSION(
+            LETTER_GRADE CHAR(2) NOT NULL,
+            NUMBER_GRADE DECIMAL(2,1)
 );
