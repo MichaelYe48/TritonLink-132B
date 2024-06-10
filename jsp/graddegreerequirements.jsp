@@ -117,16 +117,16 @@
         "           CONCAT(cl.Quarter, ' ', cl.Year) AS Next_Offered, " +
         "           ROW_NUMBER() OVER (PARTITION BY co.Concentration_Name, c.Course_Number ORDER BY cl.Year, " +
         "                              CASE " +
-        "                                  WHEN cl.Quarter = 'WINTER' THEN 1 " +
-        "                                  WHEN cl.Quarter = 'SPRING' THEN 2 " +
-        "                                  WHEN cl.Quarter = 'SUMMER' THEN 3 " +
-        "                                  WHEN cl.Quarter = 'FALL' THEN 4 " +
+        "                                  WHEN cl.Quarter = 'Winter' THEN 1 " +
+        "                                  WHEN cl.Quarter = 'Spring' THEN 2 " +
+        "                                  WHEN cl.Quarter = 'Summer' THEN 3 " +
+        "                                  WHEN cl.Quarter = 'Fall' THEN 4 " +
         "                              END) AS rn " +
         "    FROM Concentration co " +
         "    JOIN Course c ON co.Course_Number = c.Course_Number " +
         "    JOIN Class cl ON c.Course_Number = cl.Course_number " +
         "    WHERE co.Degree_Name = ? " +
-        "      AND (cl.Year > 2018 OR (cl.Year = 2018 AND cl.Quarter IN ('SUMMER', 'FALL', 'WINTER'))) " +
+        "      AND (cl.Year > 2018 OR (cl.Year = 2018 AND cl.Quarter IN ('Summer', 'Fall', 'Winter'))) " +
         "      AND NOT EXISTS ( " +
         "          SELECT 1 " +
         "          FROM Enrolled_In e " +
