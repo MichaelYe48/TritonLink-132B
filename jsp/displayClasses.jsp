@@ -21,7 +21,7 @@
                                "FROM Class c " +
                                "JOIN Consists_of_Sections cs ON c.Course_number = cs.Course_number " +
                                "JOIN Student_Section ss ON cs.Section_id = ss.Section_id " +
-                               "WHERE ss.SSN = ? AND c.Quarter = 'SPRING' AND c.Year = 2018";
+                               "WHERE ss.SSN = ? AND c.Quarter = 'Spring' AND c.Year = 2018";
                                
                 ps = connection.prepareStatement(query);
                 ps.setString(1, selectedSSN);
