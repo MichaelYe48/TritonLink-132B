@@ -87,71 +87,58 @@
                         // Insert
                         // Check if an insertion is requested
                         String action = request.getParameter("action");
-                        if (action != null && action.equals("insert")) {
-                            // Check if the record already exists
-                            PreparedStatement checkStmt = connection.prepareStatement(
-                                "SELECT COUNT(*) FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
-                            checkStmt.setString(1, request.getParameter("SSN"));
-                            checkStmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
-                            checkStmt.setString(3, request.getParameter("Title"));
-                            checkStmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
-                            checkStmt.setString(5, request.getParameter("Quarter"));
-                            checkStmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
-                            ResultSet checkResult = checkStmt.executeQuery();
-                            checkResult.next();
-                            int count = checkResult.getInt(1);
-                            checkStmt.close();
-                            
-                            if (count == 0) { // If record doesn't exist, then insert
-                                PreparedStatement pstmt = connection.prepareStatement(
-                                    "INSERT INTO Enrolled_In (SSN, Course_number, Title, Section_id, Quarter, Year, Taken, Grade_Achieved) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-                                pstmt.setString(1, request.getParameter("SSN"));
-                                pstmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
-                                pstmt.setString(3, request.getParameter("Title"));
-                                pstmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
-                                pstmt.setString(5, request.getParameter("Quarter"));
-                                pstmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
-                                boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
-                                pstmt.setBoolean(7, taken);
-                                pstmt.setString(8, request.getParameter("Grade_Achieved"));
-                                pstmt.executeUpdate();
-                                pstmt.close();
-                            } else {
-                                out.println("Record already exists!");
+                        if (action != null) {
+                            try {
+                                if (action.equals("insert")) {
+                                    // Insert operation
+                                    PreparedStatement pstmt = connection.prepareStatement(
+                                        "INSERT INTO Enrolled_In (SSN, Course_number, Title, Section_id, Quarter, Year, Taken, Grade_Achieved) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                                    pstmt.setString(1, request.getParameter("SSN"));
+                                    pstmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
+                                    pstmt.setString(3, request.getParameter("Title"));
+                                    pstmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                                    pstmt.setString(5, request.getParameter("Quarter"));
+                                    pstmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
+                                    boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
+                                    pstmt.setBoolean(7, taken);
+                                    pstmt.setString(8, request.getParameter("Grade_Achieved"));
+                                    pstmt.executeUpdate();
+                                    pstmt.close();
+                                } else if (action.equals("update")) {
+                                    // Update operation
+                                    PreparedStatement pstmt = connection.prepareStatement(
+                                        "UPDATE Enrolled_In SET Taken = ?, Grade_Achieved = ? WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
+                                    boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
+                                    pstmt.setBoolean(1, taken);
+                                    pstmt.setString(2, request.getParameter("Grade_Achieved"));
+                                    pstmt.setString(3, request.getParameter("SSN"));
+                                    pstmt.setInt(4, Integer.parseInt(request.getParameter("Course_number")));
+                                    pstmt.setString(5, request.getParameter("Title"));
+                                    pstmt.setInt(6, Integer.parseInt(request.getParameter("Section_id")));
+                                    pstmt.setString(7, request.getParameter("Quarter"));
+                                    pstmt.setInt(8, Integer.parseInt(request.getParameter("Year")));
+                                    pstmt.executeUpdate();
+                                    pstmt.close();
+                                } else if (action.equals("delete")) {
+                                    // Delete operation
+                                    PreparedStatement pstmt = connection.prepareStatement(
+                                        "DELETE FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
+                                    pstmt.setString(1, request.getParameter("SSN"));
+                                    pstmt.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
+                                    pstmt.setString(3, request.getParameter("Title"));
+                                    pstmt.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
+                                    pstmt.setString(5, request.getParameter("Quarter"));
+                                    pstmt.setInt(6, Integer.parseInt(request.getParameter("Year")));
+                                    pstmt.executeUpdate();
+                                    pstmt.close();
+                                }
+                            } catch (SQLException e) {
+                                String errorMessage = e.getMessage();
+                                if (errorMessage.contains("Enrollment limit")) {
+                                    errorMessage = errorMessage.split("Where:")[0].trim();  // Remove the 'Where:' part
+                                }
+                                out.println("Error: " + errorMessage);
                             }
-                        }
-
-                        // Update
-                        // Check if an update is requested
-                        if (action != null && action.equals("update")) {
-                            PreparedStatement pstmt = connection.prepareStatement(
-                                "UPDATE Enrolled_In SET Taken = ?, Grade_Achieved = ? WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
-                            boolean taken = request.getParameter("Taken") != null && request.getParameter("Taken").equals("on");
-                            pstmt.setBoolean(1, taken);
-                            pstmt.setString(2, request.getParameter("Grade_Achieved"));
-                            pstmt.setString(3, request.getParameter("SSN"));
-                            pstmt.setInt(4, Integer.parseInt(request.getParameter("Course_number")));
-                            pstmt.setString(5, request.getParameter("Title"));
-                            pstmt.setInt(6, Integer.parseInt(request.getParameter("Section_id")));
-                            pstmt.setString(7, request.getParameter("Quarter"));
-                            pstmt.setInt(8, Integer.parseInt(request.getParameter("Year")));
-                            pstmt.executeUpdate();
-                            pstmt.close();
-                        }
-
-                        // Delete
-                        // Check if a delete is requested
-                        if (action != null && action.equals("delete")) {
-                            PreparedStatement pstmt1 = connection.prepareStatement(
-                                "DELETE FROM Enrolled_In WHERE SSN = ? AND Course_number = ? AND Title = ? AND Section_id = ? AND Quarter = ? AND Year = ?");
-                            pstmt1.setString(1, request.getParameter("SSN"));
-                            pstmt1.setInt(2, Integer.parseInt(request.getParameter("Course_number")));
-                            pstmt1.setString(3, request.getParameter("Title"));
-                            pstmt1.setInt(4, Integer.parseInt(request.getParameter("Section_id")));
-                            pstmt1.setString(5, request.getParameter("Quarter"));
-                            pstmt1.setInt(6, Integer.parseInt(request.getParameter("Year")));
-                            pstmt1.executeUpdate();
-                            pstmt1.close();
                         }
 
                         // Create the statement

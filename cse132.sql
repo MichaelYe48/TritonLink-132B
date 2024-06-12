@@ -341,3 +341,65 @@ create table GRADE_CONVERSION(
             LETTER_GRADE CHAR(2) NOT NULL,
             NUMBER_GRADE DECIMAL(2,1)
 );
+
+CREATE OR REPLACE FUNCTION check_enrollment_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+    current_enrollment INT;
+    enrollment_limit INT;
+BEGIN
+    -- Get the current number of enrolled students for the section
+    SELECT Number_enrolled INTO current_enrollment
+    FROM Section
+    WHERE Section_id = NEW.Section_id;
+
+    -- Get the enrollment limit for the section
+    SELECT Enroll_limit INTO enrollment_limit
+    FROM Section
+    WHERE Section_id = NEW.Section_id;
+
+    -- Check if the enrollment limit has been reached
+    IF current_enrollment >= enrollment_limit THEN
+        RAISE EXCEPTION 'Enrollment limit of % for section % has been reached. Cannot enroll more students.',
+                        enrollment_limit, NEW.Section_id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_check_enrollment_limit
+BEFORE INSERT ON Enrolled_In
+FOR EACH ROW
+EXECUTE FUNCTION check_enrollment_limit();
+
+
+CREATE OR REPLACE FUNCTION increment_enrollment_count()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Section
+    SET Number_enrolled = Number_enrolled + 1
+    WHERE Section_id = NEW.Section_id;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_increment_enrollment_count
+AFTER INSERT ON Enrolled_In
+FOR EACH ROW
+EXECUTE FUNCTION increment_enrollment_count();
+
+CREATE OR REPLACE FUNCTION decrement_enrollment_count()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE Section
+    SET Number_enrolled = Number_enrolled - 1
+    WHERE Section_id = OLD.Section_id;
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_decrement_enrollment_count
+AFTER DELETE ON Enrolled_In
+FOR EACH ROW
+EXECUTE FUNCTION decrement_enrollment_count();

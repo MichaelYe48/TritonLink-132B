@@ -42,7 +42,7 @@
                                     "INSERT INTO Section (Section_id, Enroll_limit, Number_enrolled) VALUES (?, ?, ?)");
                                 pstmt.setInt(1, Integer.parseInt(request.getParameter("Section_id")));
                                 pstmt.setInt(2, Integer.parseInt(request.getParameter("Enroll_limit")));
-                                pstmt.setInt(3, Integer.parseInt(request.getParameter("Number_enrolled")));
+                                pstmt.setInt(3, 0);
                                 pstmt.executeUpdate();
                                 pstmt.close();
                             } else {
@@ -57,10 +57,9 @@
                             // Create the prepared statement and use it to
                             // UPDATE the Section attributes in the Section table.
                             PreparedStatement pstatement = connection.prepareStatement(
-                                "UPDATE Section SET Enroll_limit = ?, Number_enrolled = ? WHERE Section_id = ?");
+                                "UPDATE Section SET Enroll_limit = ? WHERE Section_id = ?");
                             pstatement.setInt(1, Integer.parseInt(request.getParameter("Enroll_limit")));
-                            pstatement.setInt(2, Integer.parseInt(request.getParameter("Number_enrolled")));
-                            pstatement.setInt(3, Integer.parseInt(request.getParameter("Section_id")));
+                            pstatement.setInt(2, Integer.parseInt(request.getParameter("Section_id")));
                             pstatement.executeUpdate();
                             pstatement.close();
                         }
@@ -90,7 +89,7 @@
                             <input type="hidden" value="insert" name="action">
                             <th><input value="" name="Section_id" size="15"></th>
                             <th><input value="" name="Enroll_limit" size="15"></th>
-                            <th><input value="" name="Number_enrolled" size="15"></th>
+                            <th><input value="" name="Number_enrolled" size="15" readonly></th>
                             <th><input type="submit" value="Insert"></th>
                         </form>
                     </tr>
