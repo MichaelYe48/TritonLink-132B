@@ -73,14 +73,14 @@
 
                             // Query to get grade distribution for a professor in a quarter and course
                             if (courseID != null && !courseID.isEmpty() && professor != null && !professor.isEmpty() && quarter != null && !quarter.isEmpty()) {
-                                String query = "SELECT COUNT(CASE WHEN Grade_Achieved = 'A' THEN 1 END) AS A_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved = 'B' THEN 1 END) AS B_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved = 'C' THEN 1 END) AS C_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved = 'D' THEN 1 END) AS D_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved NOT IN ('A', 'B', 'C', 'D') THEN 1 END) AS other_count " +
+                                String query = "SELECT COUNT(CASE WHEN Grade_Achieved LIKE 'A%' THEN 1 END) AS A_count, " +
+                                               "       COUNT(CASE WHEN Grade_Achieved LIKE 'B%' THEN 1 END) AS B_count, " +
+                                               "       COUNT(CASE WHEN Grade_Achieved LIKE 'C%' THEN 1 END) AS C_count, " +
+                                               "       COUNT(CASE WHEN Grade_Achieved LIKE 'D%' THEN 1 END) AS D_count, " +
+                                               "       COUNT(CASE WHEN Grade_Achieved NOT LIKE 'A%' AND Grade_Achieved NOT LIKE 'B%' AND Grade_Achieved NOT LIKE 'C%' AND Grade_Achieved NOT LIKE 'D%' THEN 1 END) AS other_count " +
                                                "FROM Enrolled_In e " +
                                                "JOIN Class c ON e.Course_Number = c.Course_number AND e.Title = c.Title AND e.Quarter = c.Quarter AND e.Year = c.Year " +
-                                               "WHERE e.Course_Number = ? AND c.Quarter = ? AND c.Year = ? AND e.Grade_Achieved IS NOT NULL " +
+                                               "WHERE e.Course_Number = ? AND c.Quarter = ? AND c.Year = ? " +
                                                "  AND EXISTS (SELECT 1 FROM Taught_By t WHERE t.Section_ID = e.Section_id " +
                                                "              AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ?)";
                                 pstmt = connection.prepareStatement(query);
@@ -90,9 +90,9 @@
 
                                 // Split professor name into first, middle, and last name
                                 String[] names = professor.split("\\s+", 3);
-                                String firstName = names.length > 0 ? names[0] : "";
-                                String middleName = names.length > 1 ? names[1] : "";
-                                String lastName = names.length > 2 ? names[2] : "";
+                                String firstName = names.length > 1 ? names[0] : "";
+                                String middleName = names.length == 3 ? names[1] : "";
+                                String lastName = names.length > 0 ? names[names.length - 1] : "";
 
                                 pstmt.setString(4, firstName);
                                 pstmt.setString(5, middleName);
@@ -139,22 +139,22 @@
                             String professor2 = request.getParameter("professor2");
 
                             if (courseID2 != null && !courseID2.isEmpty() && professor2 != null && !professor2.isEmpty()) {
-                                String query2 = "SELECT COUNT(CASE WHEN Grade_Achieved = 'A' THEN 1 END) AS A_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved = 'B' THEN 1 END) AS B_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved = 'C' THEN 1 END) AS C_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved = 'D' THEN 1 END) AS D_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved NOT IN ('A', 'B', 'C', 'D') THEN 1 END) AS other_count " +
+                                String query2 = "SELECT COUNT(CASE WHEN Grade_Achieved LIKE 'A%' THEN 1 END) AS A_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'B%' THEN 1 END) AS B_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'C%' THEN 1 END) AS C_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'D%' THEN 1 END) AS D_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved NOT LIKE 'A%' AND Grade_Achieved NOT LIKE 'B%' AND Grade_Achieved NOT LIKE 'C%' AND Grade_Achieved NOT LIKE 'D%' THEN 1 END) AS other_count " +
                                                 "FROM Enrolled_In e " +
                                                 "JOIN Taught_By t ON e.Section_id = t.Section_ID " +
-                                                "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ?";
+                                                "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ? AND NOT (e.Quarter = 'Spring' AND e.Year = 2018)";
                                 pstmt = connection.prepareStatement(query2);
                                 pstmt.setInt(1, Integer.parseInt(courseID2));
 
                                 // Split professor name into first, middle, and last name
                                 String[] names2 = professor2.split("\\s+", 3);
-                                String firstName2 = names2.length > 0 ? names2[0] : "";
-                                String middleName2 = names2.length > 1 ? names2[1] : "";
-                                String lastName2 = names2.length > 2 ? names2[2] : "";
+                                String firstName2 = names2.length > 1 ? names2[0] : "";
+                                String middleName2 = names2.length == 3 ? names2[1] : "";
+                                String lastName2 = names2.length > 0 ? names2[names2.length - 1] : "";
 
                                 pstmt.setString(2, firstName2);
                                 pstmt.setString(3, middleName2);
@@ -200,13 +200,13 @@
                             String courseID3 = request.getParameter("courseID3");
 
                             if (courseID3 != null && !courseID3.isEmpty()) {
-                                String query3 = "SELECT COUNT(CASE WHEN Grade_Achieved = 'A' THEN 1 END) AS A_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved = 'B' THEN 1 END) AS B_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved = 'C' THEN 1 END) AS C_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved = 'D' THEN 1 END) AS D_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved NOT IN ('A', 'B', 'C', 'D') THEN 1 END) AS other_count " +
+                                String query3 = "SELECT COUNT(CASE WHEN Grade_Achieved LIKE 'A%' THEN 1 END) AS A_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'B%' THEN 1 END) AS B_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'C%' THEN 1 END) AS C_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'D%' THEN 1 END) AS D_count, " +
+                                                "       COUNT(CASE WHEN Grade_Achieved NOT LIKE 'A%' AND Grade_Achieved NOT LIKE 'B%' AND Grade_Achieved NOT LIKE 'C%' AND Grade_Achieved NOT LIKE 'D%' THEN 1 END) AS other_count " +
                                                 "FROM Enrolled_In " +
-                                                "WHERE Course_Number = ? AND Grade_Achieved IS NOT NULL";
+                                                "WHERE Course_Number = ? AND Grade_Achieved IS NOT NULL AND NOT (Quarter = 'Spring' AND Year = 2018)";
                                 pstmt = connection.prepareStatement(query3);
                                 pstmt.setInt(1, Integer.parseInt(courseID3));
 
@@ -251,22 +251,34 @@
                             String professor4 = request.getParameter("professor4");
 
                             if (courseID4 != null && !courseID4.isEmpty() && professor4 != null && !professor4.isEmpty()) {
-                                String query4 = "SELECT AVG(CASE WHEN Grade_Achieved = 'A' THEN 4.0 " +
-                                                "            WHEN Grade_Achieved = 'B' THEN 3.0 " +
-                                                "            WHEN Grade_Achieved = 'C' THEN 2.0 " +
-                                                "            WHEN Grade_Achieved = 'D' THEN 1.0 " +
-                                                "            ELSE 0.0 END) AS GPA " +
+                                String query4 = "SELECT AVG(CASE " +
+                                                "WHEN Grade_Achieved = 'A+' THEN 4.3 " +
+                                                "WHEN Grade_Achieved = 'A' THEN 4.0 " +
+                                                "WHEN Grade_Achieved = 'A-' THEN 3.7 " +
+                                                "WHEN Grade_Achieved = 'B+' THEN 3.3 " +
+                                                "WHEN Grade_Achieved = 'B' THEN 3.0 " +
+                                                "WHEN Grade_Achieved = 'B-' THEN 2.7 " +
+                                                "WHEN Grade_Achieved = 'C+' THEN 2.3 " +
+                                                "WHEN Grade_Achieved = 'C' THEN 2.0 " +
+                                                "WHEN Grade_Achieved = 'C-' THEN 1.7 " +
+                                                "WHEN Grade_Achieved = 'D+' THEN 1.3 " +
+                                                "WHEN Grade_Achieved = 'D' THEN 1.0 " +
+                                                "WHEN Grade_Achieved = 'D-' THEN 0.7 " +
+                                                "ELSE 0.0 END) AS GPA " +
                                                 "FROM Enrolled_In e " +
                                                 "JOIN Taught_By t ON e.Section_id = t.Section_ID " +
-                                                "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ? AND e.Grade_Achieved NOT IN ('I', 'S', 'U')";
+                                                "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ? AND (e.Grade_Achieved LIKE 'A%' " +
+                                                "OR e.Grade_Achieved LIKE 'B%' " +
+                                                "OR e.Grade_Achieved LIKE 'C%' " +
+                                                "OR e.Grade_Achieved LIKE 'D%')";
                                 pstmt = connection.prepareStatement(query4);
                                 pstmt.setInt(1, Integer.parseInt(courseID4));
 
                                 // Split professor name into first, middle, and last name
                                 String[] names4 = professor4.split("\\s+", 3);
-                                String firstName4 = names4.length > 0 ? names4[0] : "";
-                                String middleName4 = names4.length > 1 ? names4[1] : "";
-                                String lastName4 = names4.length > 2 ? names4[2] : "";
+                                String firstName4 = names4.length > 1 ? names4[0] : "";
+                                String middleName4 = names4.length == 3 ? names4[1] : "";
+                                String lastName4 = names4.length > 0 ? names4[names4.length - 1] : "";
 
                                 pstmt.setString(2, firstName4);
                                 pstmt.setString(3, middleName4);
