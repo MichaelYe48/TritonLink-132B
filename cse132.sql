@@ -342,6 +342,7 @@ create table GRADE_CONVERSION(
             NUMBER_GRADE DECIMAL(2,1)
 );
 
+-- Create trigger function
 CREATE OR REPLACE FUNCTION check_enrollment_limit()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -368,12 +369,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- create trigger for enrolled_in
 CREATE TRIGGER trigger_check_enrollment_limit
 BEFORE INSERT ON Enrolled_In
 FOR EACH ROW
 EXECUTE FUNCTION check_enrollment_limit();
 
-
+-- trigger function for incrementing count
 CREATE OR REPLACE FUNCTION increment_enrollment_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -384,11 +386,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- creating trigger for insert
 CREATE TRIGGER trigger_increment_enrollment_count
 AFTER INSERT ON Enrolled_In
 FOR EACH ROW
 EXECUTE FUNCTION increment_enrollment_count();
 
+-- creating trigger function for decrement
 CREATE OR REPLACE FUNCTION decrement_enrollment_count()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -399,7 +403,293 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- create trigger for delete
 CREATE TRIGGER trigger_decrement_enrollment_count
 AFTER DELETE ON Enrolled_In
 FOR EACH ROW
 EXECUTE FUNCTION decrement_enrollment_count();
+
+CREATE TABLE CPQG AS
+SELECT 
+    e.Course_Number AS Course_Number,
+    TRIM(CONCAT_WS(' ', t.First_Name, t.Middle_Name, t.Last_Name)) AS Professor_Name,
+    e.Quarter,
+    e.Year,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'A%' THEN 1 ELSE 0 END) AS A,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'B%' THEN 1 ELSE 0 END) AS B,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'C%' THEN 1 ELSE 0 END) AS C,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'D%' THEN 1 ELSE 0 END) AS D,
+    SUM(CASE WHEN e.Grade_Achieved NOT LIKE 'A%' 
+                   AND e.Grade_Achieved NOT LIKE 'B%' 
+                   AND e.Grade_Achieved NOT LIKE 'C%' 
+                   AND e.Grade_Achieved NOT LIKE 'D%' THEN 1 ELSE 0 END) AS Other
+FROM 
+    Enrolled_In e
+JOIN 
+    Taught_By t ON e.Section_id = t.Section_ID
+GROUP BY 
+    e.Course_Number, Professor_Name, e.Quarter, e.Year;
+
+CREATE TABLE CPG AS
+SELECT 
+    e.Course_Number AS Course_Number,
+    TRIM(CONCAT_WS(' ', t.First_Name, t.Middle_Name, t.Last_Name)) AS Professor_Name,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'A%' THEN 1 ELSE 0 END) AS A,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'B%' THEN 1 ELSE 0 END) AS B,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'C%' THEN 1 ELSE 0 END) AS C,
+    SUM(CASE WHEN e.Grade_Achieved LIKE 'D%' THEN 1 ELSE 0 END) AS D,
+    SUM(CASE WHEN e.Grade_Achieved NOT LIKE 'A%' 
+                   AND e.Grade_Achieved NOT LIKE 'B%' 
+                   AND e.Grade_Achieved NOT LIKE 'C%' 
+                   AND e.Grade_Achieved NOT LIKE 'D%' THEN 1 ELSE 0 END) AS Other
+FROM 
+    Enrolled_In e
+JOIN 
+    Taught_By t ON e.Section_id = t.Section_ID
+WHERE NOT (e.Quarter = 'Spring' AND e.Year = 2018)
+GROUP BY 
+    e.Course_Number, Professor_Name;
+
+-- Trigger for updating CPQG table
+CREATE OR REPLACE FUNCTION update_CPQG()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the inserted grade matches A, B, C, D or Other
+    IF NEW.Grade_Achieved LIKE 'A%' THEN
+        UPDATE CPQG
+        SET A = A + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSIF NEW.Grade_Achieved LIKE 'B%' THEN
+        UPDATE CPQG
+        SET B = B + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSIF NEW.Grade_Achieved LIKE 'C%' THEN
+        UPDATE CPQG
+        SET C = C + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSIF NEW.Grade_Achieved LIKE 'D%' THEN
+        UPDATE CPQG
+        SET D = D + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSE
+        UPDATE CPQG
+        SET Other = Other + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- Trigger for updating CPQG table upon deletion
+CREATE OR REPLACE FUNCTION decrement_CPQG()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the deleted grade matches A, B, C, D or Other
+    IF OLD.Grade_Achieved LIKE 'A%' THEN
+        UPDATE CPQG
+        SET A = A - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID)
+        AND Quarter = OLD.Quarter
+        AND Year = OLD.Year;
+    ELSIF OLD.Grade_Achieved LIKE 'B%' THEN
+        UPDATE CPQG
+        SET B = B - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID)
+        AND Quarter = OLD.Quarter
+        AND Year = OLD.Year;
+    ELSIF OLD.Grade_Achieved LIKE 'C%' THEN
+        UPDATE CPQG
+        SET C = C - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID)
+        AND Quarter = OLD.Quarter
+        AND Year = OLD.Year;
+    ELSIF OLD.Grade_Achieved LIKE 'D%' THEN
+        UPDATE CPQG
+        SET D = D - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID)
+        AND Quarter = OLD.Quarter
+        AND Year = OLD.Year;
+    ELSE
+        UPDATE CPQG
+        SET Other = Other - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID)
+        AND Quarter = OLD.Quarter
+        AND Year = OLD.Year;
+    END IF;
+    
+    RETURN OLD;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- Trigger for updating CPG table upon deletion
+CREATE OR REPLACE FUNCTION decrement_CPG()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the deleted grade matches A, B, C, D or Other
+    IF OLD.Grade_Achieved LIKE 'A%' THEN
+        UPDATE CPG
+        SET A = A - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID);
+    ELSIF OLD.Grade_Achieved LIKE 'B%' THEN
+        UPDATE CPG
+        SET B = B - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID);
+    ELSIF OLD.Grade_Achieved LIKE 'C%' THEN
+        UPDATE CPG
+        SET C = C - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID);
+    ELSIF OLD.Grade_Achieved LIKE 'D%' THEN
+        UPDATE CPG
+        SET D = D - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID);
+    ELSE
+        UPDATE CPG
+        SET Other = Other - 1
+        WHERE Course_Number = OLD.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = OLD.Section_ID);
+    END IF;
+    
+    RETURN OLD;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- Trigger definition for CPQG table (Deletion)
+CREATE TRIGGER decrement_CPQG_trigger
+AFTER DELETE ON Enrolled_In
+FOR EACH ROW
+EXECUTE FUNCTION decrement_CPQG();
+
+-- Trigger definition for CPG table (Deletion)
+CREATE TRIGGER decrement_CPG_trigger
+AFTER DELETE ON Enrolled_In
+FOR EACH ROW
+EXECUTE FUNCTION decrement_CPG();
+
+-- Trigger for updating CPG table
+CREATE OR REPLACE FUNCTION update_CPG()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the inserted grade matches A, B, C, D or Other
+    IF NEW.Grade_Achieved LIKE 'A%' THEN
+        UPDATE CPG
+        SET A = A + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID);
+    ELSIF NEW.Grade_Achieved LIKE 'B%' THEN
+        UPDATE CPG
+        SET B = B + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID);
+    ELSIF NEW.Grade_Achieved LIKE 'C%' THEN
+        UPDATE CPG
+        SET C = C + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID);
+    ELSIF NEW.Grade_Achieved LIKE 'D%' THEN
+        UPDATE CPG
+        SET D = D + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID);
+    ELSE
+        UPDATE CPG
+        SET Other = Other + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID);
+    END IF;
+    
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;
+
+-- Trigger definition for CPQG table
+CREATE TRIGGER update_CPQG_trigger
+AFTER INSERT ON Enrolled_In
+FOR EACH ROW
+EXECUTE FUNCTION update_CPQG();
+
+-- Trigger definition for CPG table
+CREATE TRIGGER update_CPG_trigger
+AFTER INSERT ON Enrolled_In
+FOR EACH ROW
+EXECUTE FUNCTION update_CPG();
+
+-- Trigger for updating CPQG table
+CREATE OR REPLACE FUNCTION update_CPQG()
+RETURNS TRIGGER AS
+$$
+BEGIN
+    -- Check if the inserted grade matches A, B, C, D or Other
+    IF NEW.Grade_Achieved LIKE 'A%' THEN
+        UPDATE CPQG
+        SET A = A + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSIF NEW.Grade_Achieved LIKE 'B%' THEN
+        UPDATE CPQG
+        SET B = B + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSIF NEW.Grade_Achieved LIKE 'C%' THEN
+        UPDATE CPQG
+        SET C = C + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSIF NEW.Grade_Achieved LIKE 'D%' THEN
+        UPDATE CPQG
+        SET D = D + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    ELSE
+        UPDATE CPQG
+        SET Other = Other + 1
+        WHERE Course_Number = NEW.Course_Number
+        AND Professor_Name = (SELECT TRIM(CONCAT_WS(' ', First_Name, Middle_Name, Last_Name)) FROM Taught_By WHERE Section_ID = NEW.Section_ID)
+        AND Quarter = NEW.Quarter
+        AND Year = NEW.Year;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$
+LANGUAGE plpgsql;

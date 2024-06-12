@@ -73,30 +73,14 @@
 
                             // Query to get grade distribution for a professor in a quarter and course
                             if (courseID != null && !courseID.isEmpty() && professor != null && !professor.isEmpty() && quarter != null && !quarter.isEmpty()) {
-                                String query = "SELECT COUNT(CASE WHEN Grade_Achieved LIKE 'A%' THEN 1 END) AS A_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved LIKE 'B%' THEN 1 END) AS B_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved LIKE 'C%' THEN 1 END) AS C_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved LIKE 'D%' THEN 1 END) AS D_count, " +
-                                               "       COUNT(CASE WHEN Grade_Achieved NOT LIKE 'A%' AND Grade_Achieved NOT LIKE 'B%' AND Grade_Achieved NOT LIKE 'C%' AND Grade_Achieved NOT LIKE 'D%' THEN 1 END) AS other_count " +
-                                               "FROM Enrolled_In e " +
-                                               "JOIN Class c ON e.Course_Number = c.Course_number AND e.Title = c.Title AND e.Quarter = c.Quarter AND e.Year = c.Year " +
-                                               "WHERE e.Course_Number = ? AND c.Quarter = ? AND c.Year = ? " +
-                                               "  AND EXISTS (SELECT 1 FROM Taught_By t WHERE t.Section_ID = e.Section_id " +
-                                               "              AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ?)";
+                                String query = "SELECT a, b, c, d, other " +
+                                               "FROM CPQG " +
+                                               "WHERE Course_Number = ? AND Quarter = ? AND Year = ? AND Professor_Name = ?";
                                 pstmt = connection.prepareStatement(query);
                                 pstmt.setInt(1, Integer.parseInt(courseID));
                                 pstmt.setString(2, quarter);
                                 pstmt.setInt(3, Integer.parseInt(year));
-
-                                // Split professor name into first, middle, and last name
-                                String[] names = professor.split("\\s+", 3);
-                                String firstName = names.length > 1 ? names[0] : "";
-                                String middleName = names.length == 3 ? names[1] : "";
-                                String lastName = names.length > 0 ? names[names.length - 1] : "";
-
-                                pstmt.setString(4, firstName);
-                                pstmt.setString(5, middleName);
-                                pstmt.setString(6, lastName);
+                                pstmt.setString(4, professor);
 
                                 rs = pstmt.executeQuery();
                                 if (rs.next()) {
@@ -109,23 +93,23 @@
                     </tr>
                     <tr>
                         <td>A</td>
-                        <td><%= rs.getInt("A_count") %></td>
+                        <td><%= rs.getInt("a") %></td>
                     </tr>
                     <tr>
                         <td>B</td>
-                        <td><%= rs.getInt("B_count") %></td>
+                        <td><%= rs.getInt("b") %></td>
                     </tr>
                     <tr>
                         <td>C</td>
-                        <td><%= rs.getInt("C_count") %></td>
+                        <td><%= rs.getInt("c") %></td>
                     </tr>
                     <tr>
                         <td>D</td>
-                        <td><%= rs.getInt("D_count") %></td>
+                        <td><%= rs.getInt("d") %></td>
                     </tr>
                     <tr>
                         <td>Other</td>
-                        <td><%= rs.getInt("other_count") %></td>
+                        <td><%= rs.getInt("other") %></td>
                     </tr>
                 </table>
                 <%
@@ -139,26 +123,12 @@
                             String professor2 = request.getParameter("professor2");
 
                             if (courseID2 != null && !courseID2.isEmpty() && professor2 != null && !professor2.isEmpty()) {
-                                String query2 = "SELECT COUNT(CASE WHEN Grade_Achieved LIKE 'A%' THEN 1 END) AS A_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'B%' THEN 1 END) AS B_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'C%' THEN 1 END) AS C_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved LIKE 'D%' THEN 1 END) AS D_count, " +
-                                                "       COUNT(CASE WHEN Grade_Achieved NOT LIKE 'A%' AND Grade_Achieved NOT LIKE 'B%' AND Grade_Achieved NOT LIKE 'C%' AND Grade_Achieved NOT LIKE 'D%' THEN 1 END) AS other_count " +
-                                                "FROM Enrolled_In e " +
-                                                "JOIN Taught_By t ON e.Section_id = t.Section_ID " +
-                                                "WHERE e.Course_Number = ? AND t.First_Name = ? AND t.Middle_Name = ? AND t.Last_Name = ? AND NOT (e.Quarter = 'Spring' AND e.Year = 2018)";
+                                String query2 = "SELECT a, b, c, d, other " +
+                                                "FROM CPG " +
+                                                "WHERE Course_Number = ? AND Professor_Name = ?";
                                 pstmt = connection.prepareStatement(query2);
                                 pstmt.setInt(1, Integer.parseInt(courseID2));
-
-                                // Split professor name into first, middle, and last name
-                                String[] names2 = professor2.split("\\s+", 3);
-                                String firstName2 = names2.length > 1 ? names2[0] : "";
-                                String middleName2 = names2.length == 3 ? names2[1] : "";
-                                String lastName2 = names2.length > 0 ? names2[names2.length - 1] : "";
-
-                                pstmt.setString(2, firstName2);
-                                pstmt.setString(3, middleName2);
-                                pstmt.setString(4, lastName2);
+                                pstmt.setString(2, professor2);
 
                                 rs = pstmt.executeQuery();
                                 if (rs.next()) {
@@ -171,23 +141,23 @@
                     </tr>
                     <tr>
                         <td>A</td>
-                        <td><%= rs.getInt("A_count") %></td>
+                        <td><%= rs.getInt("a") %></td>
                     </tr>
                     <tr>
                         <td>B</td>
-                        <td><%= rs.getInt("B_count") %></td>
+                        <td><%= rs.getInt("b") %></td>
                     </tr>
                     <tr>
                         <td>C</td>
-                        <td><%= rs.getInt("C_count") %></td>
+                        <td><%= rs.getInt("c") %></td>
                     </tr>
                     <tr>
                         <td>D</td>
-                        <td><%= rs.getInt("D_count") %></td>
+                        <td><%= rs.getInt("d") %></td>
                     </tr>
                     <tr>
                         <td>Other</td>
-                        <td><%= rs.getInt("other_count") %></td>
+                        <td><%= rs.getInt("other") %></td>
                     </tr>
                 </table>
                 <%
