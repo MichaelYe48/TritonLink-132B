@@ -857,3 +857,48 @@ CREATE TRIGGER update_CPG_on_grade_change_trigger
 AFTER UPDATE OF Grade_Achieved ON Enrolled_In
 FOR EACH ROW
 EXECUTE FUNCTION update_CPG_on_grade_change();
+
+CREATE OR REPLACE FUNCTION check_meeting_conflicts()
+RETURNS TRIGGER AS $$
+DECLARE
+    meeting_record RECORD;
+    conflict_exists BOOLEAN := FALSE;
+BEGIN
+    -- Check for time conflicts with other meetings of the same section
+    FOR meeting_record IN 
+        SELECT Start_time, End_time, Meeting_type, Day
+        FROM Meeting
+        WHERE Section_id = NEW.Section_id
+        AND (NEW.Day LIKE '%' || Day || '%' OR Day LIKE '%' || NEW.Day || '%') -- Check for overlapping days
+    LOOP
+        -- Split the days into arrays for easier comparison
+        DECLARE
+            meeting_days TEXT[];
+            new_days TEXT[];
+        BEGIN
+            meeting_days := string_to_array(meeting_record.Day, '|');
+            new_days := string_to_array(NEW.Day, '|');
+
+            -- Check for any overlapping days
+            IF array_overlap(meeting_days, new_days) THEN
+                -- Check for time overlap
+                IF (NEW.Start_time, NEW.End_time) OVERLAPS (meeting_record.Start_time, meeting_record.End_time) THEN
+                    conflict_exists := TRUE;
+                    EXIT;
+                END IF;
+            END IF;
+        END;
+    END LOOP;
+
+    IF conflict_exists THEN
+        RAISE EXCEPTION 'Conflicting meeting time detected. Meetings should not overlap within the same section.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_check_meeting_conflicts
+BEFORE INSERT OR UPDATE ON Meeting
+FOR EACH ROW
+EXECUTE FUNCTION check_meeting_conflicts();
