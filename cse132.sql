@@ -902,3 +902,60 @@ CREATE TRIGGER trigger_check_meeting_conflicts
 BEFORE INSERT OR UPDATE ON Meeting
 FOR EACH ROW
 EXECUTE FUNCTION check_meeting_conflicts();
+
+CREATE OR REPLACE FUNCTION check_professor_schedule_conflict()
+RETURNS TRIGGER AS $$
+DECLARE
+    meeting_record RECORD;
+    new_quarter VARCHAR(50);
+    new_year INT;
+    conflict_exists BOOLEAN := FALSE;
+BEGIN
+    -- Fetch the quarter and year for the new section
+    SELECT cos.Quarter, cos.Year INTO new_quarter, new_year
+    FROM Consists_of_Sections cos
+    WHERE cos.Section_ID = NEW.Section_ID;
+
+    -- Check for time conflicts with other meetings of the same professor in the same quarter and year
+    FOR meeting_record IN 
+        SELECT m.Section_id, m.Day, m.Start_time, m.End_time
+        FROM Meeting m
+        JOIN Taught_By tb ON m.Section_id = tb.Section_ID
+        JOIN Consists_of_Sections cos ON m.Section_id = cos.Section_ID
+        WHERE tb.First_Name = NEW.First_Name
+        AND tb.Middle_Name = NEW.Middle_Name
+        AND tb.Last_Name = NEW.Last_Name
+        AND cos.Quarter = new_quarter
+        AND cos.Year = new_year
+        AND m.Section_id <> NEW.Section_ID
+    LOOP
+        -- Output the current meeting_record details for debugging
+        RAISE NOTICE 'Meeting Record: Section_id=%', meeting_record.Section_id;
+        RAISE NOTICE 'Meeting Record: Day=%', meeting_record.Day;
+        RAISE NOTICE 'Meeting Record: Start_time=%', meeting_record.Start_time;
+        RAISE NOTICE 'Meeting Record: End_time=%', meeting_record.End_time;
+        
+        IF EXISTS (
+            SELECT 1 
+            FROM Meeting m2 
+            WHERE m2.Section_id = NEW.Section_ID
+            AND m2.Day = meeting_record.Day
+            AND (m2.Start_time, m2.End_time) OVERLAPS (meeting_record.Start_time, meeting_record.End_time)
+        ) THEN
+            conflict_exists := TRUE;
+            EXIT;
+        END IF;
+    END LOOP;
+
+    IF conflict_exists THEN
+        RAISE EXCEPTION 'Professor cannot have overlapping sections in the same quarter and year.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_check_professor_schedule_conflict
+BEFORE INSERT OR UPDATE ON Taught_By
+FOR EACH ROW
+EXECUTE FUNCTION check_professor_schedule_conflict();
