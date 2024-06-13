@@ -1,4 +1,4 @@
-<%@ page language="java" import="java.sql.*, java.util.*, java.text.SimpleDateFormat" %>
+<%@ page language="java" import="java.sql.*, java.util.*, java.text.SimpleDateFormat, java.text.ParseException" %>
 <html>
 <head>
     <title>Schedule Review Session</title>
@@ -89,24 +89,39 @@
                             connection = DriverManager.getConnection(jdbcUrl, username, password);
 
                             // Query to find all student schedules for the selected section within the date range
-                            String studentSchedulesQuery = "SELECT m.Start_time, m.End_time, e.Section_ID " +
-                                                           "FROM Enrolled_In e " +
-                                                           "JOIN Meeting m ON e.Section_ID = m.Section_ID " +
-                                                           "WHERE e.Quarter = ? AND e.Year = ? " +
-                                                           "AND m.Start_date <= ? AND m.End_date >= ?";
+                            String studentSchedulesQuery = "SELECT DISTINCT " +
+                               "    m.Day AS day_of_the_week, " +
+                               "    m.Start_time AS time_start, " +
+                               "    m.End_time AS time_end " +
+                               "FROM Enrolled_In e " +
+                               "JOIN Meeting m ON e.Section_ID = m.Section_ID " +
+                               "WHERE e.Quarter = ? AND e.Year = ? " +
+                               "AND m.Section_ID IN (" +
+                               "    SELECT DISTINCT e2.Section_id " +
+                               "    FROM Enrolled_In e2 " +
+                               "    WHERE e2.SSN IN (" +
+                               "        SELECT e3.SSN " +
+                               "        FROM Enrolled_In e3 " +
+                               "        WHERE e3.Section_id = ? " +
+                               "          AND e3.Quarter = 'Spring' " +
+                               "          AND e3.Year = 2018" +
+                               "    )" +
+                               "    AND e2.Quarter = 'Spring' " +
+                               "    AND e2.Year = 2018" +
+                               ")";
                             pstmtConflicts = connection.prepareStatement(studentSchedulesQuery);
-                            pstmtConflicts.setString(1, "Spring");
-                            pstmtConflicts.setInt(2, 2018);
-                            pstmtConflicts.setDate(3, java.sql.Date.valueOf(startDate));
-                            pstmtConflicts.setDate(4, java.sql.Date.valueOf(endDate));
+                            pstmtConflicts.setString(1, "Spring"); // Set quarter
+                            pstmtConflicts.setInt(2, 2018); // Set year
+                            pstmtConflicts.setInt(3, Integer.parseInt(sectionID)); // Set section ID
+                            
                             rsConflicts = pstmtConflicts.executeQuery();
 
                             // Process conflict times into a set
-                            Set<String> conflictTimes = new HashSet<>();
+                            Set<String[]> conflictTimes = new HashSet<>();
                             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
                             // Calculate all hourly slots between 8AM and 8PM for each day in the date range
-                            List<String> allSlots = new ArrayList<>();
+                            List<String[]> allSlots = new ArrayList<>();
                             Calendar startCal = Calendar.getInstance();
                             startCal.setTime(sdf.parse(startDate));
                             Calendar endCal = Calendar.getInstance();
@@ -114,7 +129,46 @@
 
                             while (!startCal.after(endCal)) {
                                 for (int hour = 8; hour < 20; hour++) {
-                                    String slot = sdf.format(startCal.getTime()) + " " + hour + ":00";
+                                    String[] slot = new String[4];
+                                    slot[0] = sdf.format(startCal.getTime()); // Date
+                                    slot[1] = hour + ":00"; // Time
+                                    
+                                    // Calculate end time (1 hour after start time)
+                                    Calendar endTimeCal = Calendar.getInstance();
+                                    endTimeCal.setTime(sdf.parse(slot[0]));
+                                    endTimeCal.set(Calendar.HOUR_OF_DAY, hour + 1);
+                                    slot[2] = new SimpleDateFormat("HH:mm").format(endTimeCal.getTime()); // End Time
+
+                                    // Get day of the week
+                                    int dayOfWeek = startCal.get(Calendar.DAY_OF_WEEK);
+                                    String dayOfWeekStr;
+                                    switch (dayOfWeek) {
+                                        case Calendar.SUNDAY:
+                                            dayOfWeekStr = "Su";
+                                            break;
+                                        case Calendar.MONDAY:
+                                            dayOfWeekStr = "M";
+                                            break;
+                                        case Calendar.TUESDAY:
+                                            dayOfWeekStr = "Tu";
+                                            break;
+                                        case Calendar.WEDNESDAY:
+                                            dayOfWeekStr = "W";
+                                            break;
+                                        case Calendar.THURSDAY:
+                                            dayOfWeekStr = "Th";
+                                            break;
+                                        case Calendar.FRIDAY:
+                                            dayOfWeekStr = "F";
+                                            break;
+                                        case Calendar.SATURDAY:
+                                            dayOfWeekStr = "Sa";
+                                            break;
+                                        default:
+                                            dayOfWeekStr = "";
+                                            break;
+                                    }
+                                    slot[3] = dayOfWeekStr; // Day of the week
                                     allSlots.add(slot);
                                 }
                                 startCal.add(Calendar.DATE, 1); // Increment by 1 day
@@ -122,34 +176,43 @@
 
                             // Add student schedule times to the conflict set
                             while (rsConflicts.next()) {
-                                Time startTime = rsConflicts.getTime("Start_time");
-                                Time endTime = rsConflicts.getTime("End_time");
+                                String dayOfWeek = rsConflicts.getString("day_of_the_week");
+                                Time startTime = rsConflicts.getTime("time_start");
+                                Time endTime = rsConflicts.getTime("time_end");
 
-                                Calendar cal = Calendar.getInstance();
-                                cal.setTime(startTime);
-                                int startHour = cal.get(Calendar.HOUR_OF_DAY);
-                                cal.setTime(endTime);
-                                int endHour = cal.get(Calendar.HOUR_OF_DAY);
+                                for (String day : dayOfWeek.split("\\|")) {
+                                    String[] conflictSlot = new String[3];
+                                    conflictSlot[0] = startTime.toString().substring(0, 5); // Time start
+                                    conflictSlot[1] = endTime.toString().substring(0, 5); // Time end
+                                    conflictSlot[2] = day; // Day of the week
+                                    conflictTimes.add(conflictSlot);
 
-                                for (int hour = startHour; hour < endHour; hour++) {
-                                    conflictTimes.add(hour + ":00");
+                                    // Print the conflict slot details to the screen
+                                    out.println("<p>Conflict Slot: Time Start=" + conflictSlot[0] + ", Time End=" + conflictSlot[1] + ", Day=" + conflictSlot[2] + "</p>");
                                 }
                             }
 
-                            // Calculate recurring dates based on a 7-day interval from the start date
-                            List<String> recurringDates = new ArrayList<>();
-                            Calendar tempCal = Calendar.getInstance();
-                            tempCal.setTime(sdf.parse(startDate));
-                            while (tempCal.getTime().before(sdf.parse(endDate))) {
-                                recurringDates.add(sdf.format(tempCal.getTime()));
-                                tempCal.add(Calendar.DATE, 7); // Increment by 7 days
-                            }
-
                             // Remove conflict times from the set of all slots for each specific date
-                            for (String date : recurringDates) {
-                                for (String slot : new ArrayList<>(allSlots)) {
-                                    if (conflictTimes.contains(slot.split(" ")[1]) && slot.startsWith(date)) {
-                                        allSlots.remove(slot);
+                            Iterator<String[]> slotIterator = allSlots.iterator();
+                            while (slotIterator.hasNext()) {
+                                String[] slot = slotIterator.next();
+                                for (String[] conflictSlot : conflictTimes) {
+                                    // Compare time and day to check for overlap
+                                    SimpleDateFormat slotTimeFormat = new SimpleDateFormat("HH:mm");
+                                    java.util.Date slotStartTime = slotTimeFormat.parse(slot[1]);
+                                    java.util.Date slotEndTime = slotTimeFormat.parse(slot[2]);
+                                    java.util.Date conflictStartTime = slotTimeFormat.parse(conflictSlot[0]);
+                                    java.util.Date conflictEndTime = slotTimeFormat.parse(conflictSlot[1]);
+                                    
+                                    // Add one minute to the conflict start time
+                                    Calendar cal = Calendar.getInstance();
+                                    cal.setTime(conflictStartTime);
+                                    cal.add(Calendar.MINUTE, 1);
+                                    conflictStartTime = cal.getTime();
+                                    if (conflictSlot[2].equals(slot[3]) &&
+                                        !(slotEndTime.before(conflictStartTime) || conflictEndTime.before(slotStartTime))) {
+                                        slotIterator.remove();
+                                        break; // Remove only one slot per day per hour
                                     }
                                 }
                             }
@@ -157,10 +220,9 @@
                             // Display available times
                             out.println("<h3>Available Times for Review Session:</h3>");
                             out.println("<table border='1'>");
-                            out.println("<tr><th>Date</th><th>Time</th></tr>");
-                            for (String slot : allSlots) {
-                                String[] parts = slot.split(" ");
-                                out.println("<tr><td>" + parts[0] + "</td><td>" + parts[1] + "</td></tr>");
+                            out.println("<tr><th>Date</th><th>Day</th><th>Start Time</th><th>End Time</th></tr>");
+                            for (String[] slot : allSlots) {
+                                out.println("<tr><td>" + slot[0] + "</td><td>" + slot[3] + "</td><td>" + slot[1] + "</td><td>" + slot[2] + "</td>");
                             }
                             out.println("</table>");
 
